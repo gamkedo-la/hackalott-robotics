@@ -6,6 +6,7 @@ var increment_access_counter = function(){
   ++access_counter;
 };
 
+
 const http = require('http');
 
 const hostname = '127.0.0.1';
@@ -31,3 +32,26 @@ var update = function(){
 setInterval(update, 100); // Run the game update
 
 
+var WebSocketServer = require('websocket').server;
+// create the server
+wsServer = new WebSocketServer({
+  httpServer: server
+});
+
+// WebSocket server
+wsServer.on('request', function(request) {
+  var connection = request.accept(null, request.origin);
+
+  // This is the most important callback for us, we'll handle
+  // all messages from users here.
+  connection.on('message', function(message) {
+    if (message.type === 'utf8') {
+      // process WebSocket message
+      message.end("cycle count = " + cycle);
+    }
+  });
+
+  connection.on('close', function(connection) {
+    // close user connection
+  });
+});
