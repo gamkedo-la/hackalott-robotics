@@ -120,12 +120,12 @@ const update_sources_to_master = (on_done) => {
   const options = { cwd : source_dir };
   exec("git pull -r", options, (error, stdout, stderr) => {
     if (error) {
-      console.log("Source code update failed! -> " + error
+      console.error("Source code update failed! -> " + error
         + "\nAttempting to abort source update...");
       exec("git rebase --abort", options, (error, stdout, stderr) => {
         if(error)
         {
-          console.log("Abort failed! -> " + error);
+          console.error("Abort failed! -> " + error);
         }
         once_ready(stdout);
       });
