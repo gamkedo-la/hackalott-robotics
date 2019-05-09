@@ -46,6 +46,14 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.end("<html><body><div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
       + ", cycle = " + cycle + "</div>"
+      + "</body></html>"
+      , "utf8");
+  }
+  else if(req.method=="GET" && req.url=="/admin")
+  {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html');
+    res.end("<html><body><div>ADMIN ACCESS</div>"
       + "<button onclick=\"window.location.href='/restart'\" >UPDATE & RESTART</button>"
       + "</body></html>"
       , "utf8");
@@ -84,31 +92,6 @@ const update_cycle_tick_ms = 100;
 
 setInterval(update, update_cycle_tick_ms); // Run the game update
 
-
-// var WebSocketServer = require('websocket').server;
-// // create the server
-// wsServer = new WebSocketServer({
-//   httpServer: server
-// });
-
-// // WebSocket server
-// wsServer.on('request', function(request) {
-//   var connection = request.accept(null, request.origin);
-
-//   // This is the most important callback for us, we'll handle
-//   // all messages from users here.
-//   connection.on('message', function(message) {
-//     if (message.type === 'utf8') {
-//       // process WebSocket message
-//       message.end("cycle count = " + cycle);
-//     }
-//   });
-
-//   connection.on('close', function(connection) {
-//     // close user connection
-//   });
-// });
-
 const {spawn, exec} = require('child_process');
 
 const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
@@ -120,11 +103,11 @@ const update_sources_to_master = (on_done) => {
         on_done();
   };
   const options = { cwd : source_dir };
-  exec("git pull -r", options, (error, stdout, stderr) => {
+  execFile("git pull -r", options, (error, stdout, stderr) => {
     if (error) {
       console.error("Source code update failed! -> " + error
         + "\nAttempting to abort source update...");
-      exec("git rebase --abort", options, (error, stdout, stderr) => {
+      execFile("git rebase --abort", options, (error, stdout, stderr) => {
         if(error)
         {
           console.error("Abort failed! -> " + error);
@@ -150,3 +133,45 @@ const restart = () => {
 const update_and_restart = () => {
   update_sources_to_master(restart);
 };
+
+var WebSocketServer = require('websocket').server;
+
+var wsServer = new WebSocketServer({
+  httpServer: server,
+  // You should not use autoAcceptConnections for production
+  // applications, as it defeats all standard cross-origin protection
+  // facilities built into the protocol and the browser.  You should
+  // *always* verify the connection's origin and decide whether or not
+  // to accept it.
+  autoAcceptConnections: false
+});
+
+function clientIsAllowed(origin) {
+  // put logic here to detect whether the specified origin is allowed.
+  return true;
+}
+
+wsServer.on('request', function(request) {
+  if (!clientIsAllowed(request.origin)) {
+    // Make sure we only accept requests from an allowed origin
+    request.reject();
+    console.log((new Date()) + ' Connection from client ' + request.origin + ' rejected.');
+    return;
+  }
+  
+  var connection = request.accept('echo-protocol', request.origin);
+  console.log((new Date()) + ' Connection accepted.');
+  connection.on('message', function(message) {
+      if (message.type === 'utf8') {
+          console.log('Received Message: ' + message.utf8Data);
+          connection.sendUTF(message.utf8Data);
+      }
+      else if (message.type === 'binary') {
+          console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
+          connection.sendBytes(message.binaryData);
+      }
+  });
+  connection.on('close', function(reasonCode, description) {
+      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+  });
+});
