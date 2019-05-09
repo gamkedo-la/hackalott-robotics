@@ -61,6 +61,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.end("<html><body><div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
       + ", cycle = " + cycle + "</div>"
+      + "<div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>"
       + "</body></html>"
       , "utf8");
   }
