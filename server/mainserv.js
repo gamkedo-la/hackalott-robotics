@@ -12,7 +12,6 @@ const print_arguments = () =>
 };
 print_arguments();
 
-
 var access_counter = 0;
 var cycle = 0;
 
@@ -20,11 +19,24 @@ var increment_access_counter = function(){
   ++access_counter;
 };
 
+const processPortFromArgs = () => {
+  var port = process.argv[2]; // We assume that the argument after the source file is the port to use.
+  if(!port) {
+    throw "Specify port as 2nd argument!";
+  }
+  
+  if(!parseInt(port)) {
+    throw "Port argument must be a port number! This is not valid: " + port;
+  }
+
+  return port;
+}
+
 
 const http = require('http');
 
 const hostname = '127.0.0.1'; 
-const port = 3000;
+const port = processPortFromArgs();
 
 const server = http.createServer((req, res) => {
   if(req.method=="GET" && req.url=="/")
