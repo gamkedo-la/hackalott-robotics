@@ -19,7 +19,8 @@ It relies on NodeJS and uses `./core/` code and data.
 Server setup
 ------------
 
-1. Install NodeJs v12.1 or compatible.
+1. Install `NodeJs` v12.1 or compatible with `npm`.
+   Note that `websocket` will be installed automatically.
 2. Clone this repository (say in directory `~/prototype`).
 3. To run the game server using NodeJS server:
    1. Go in the `./server/` directory.
