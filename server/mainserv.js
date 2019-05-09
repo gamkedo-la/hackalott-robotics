@@ -80,7 +80,9 @@ var update = function(){
   ++cycle;
 };
 
-setInterval(update, 100); // Run the game update
+const update_cycle_tick_ms = 100;
+
+setInterval(update, update_cycle_tick_ms); // Run the game update
 
 
 // var WebSocketServer = require('websocket').server;
