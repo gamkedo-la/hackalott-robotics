@@ -102,7 +102,7 @@ const update_cycle_tick_ms = 100;
 
 setInterval(update, update_cycle_tick_ms); // Run the game update
 
-const {spawn, exec} = require('child_process');
+const {spawn, execFile} = require('child_process');
 
 const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
 
