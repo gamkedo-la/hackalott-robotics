@@ -34,11 +34,11 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.end("<html><body><div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
       + ", cycle = " + cycle + "</div>"
-      + "<button onclick=\"window.location.href='/reboot'\" >RESTART</button>"
+      + "<button onclick=\"window.location.href='/restart'\" >UPDATE & RESTART</button>"
       + "</body></html>"
       , "utf8");
   }
-  else if(req.method=="GET" && req.url=="/reboot") {
+  else if(req.method=="GET" && req.url=="/restart") {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
     res.end("<html>\n"
@@ -51,7 +51,7 @@ const server = http.createServer((req, res) => {
       + "</script>\n" 
       + "<body><div>RESTARTING NOW, PLEASE WAIT...</div></body>\n"
       + "</html>"
-      , "utf8", reboot);
+      , "utf8", update_and_restart);
   }
   else   {
     res.statusCode = 200;
@@ -95,13 +95,44 @@ setInterval(update, 100); // Run the game update
 //   });
 // });
 
-const {spawn} = require('child_process');
+const {spawn, exec} = require('child_process');
 
-const reboot = () => {
+const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
+
+const update_sources_to_master = (on_done) => {
+  console.log("Updating sources to last version of current branch...");
+  var once_ready = (stdout) => {
+    console.log(stdout);
+        on_done();
+  };
+  const options = { cwd : source_dir };
+  exec("git pull -r", options, (error, stdout, stderr) => {
+    if (error) {
+      console.log("Source code update failed! -> " + error
+        + "\nAttempting to abort source update...");
+      exec("git rebase --abort", options, (error, stdout, stderr) => {
+        if(error)
+        {
+          console.log("Abort failed! -> " + error);
+        }
+        once_ready(stdout);
+      });
+    }
+    else
+    {
+      once_ready(stdout);
+    }    
+  });
+};
+
+const restart = () => {
   console.log("Rebooting...");
   spawn(process.execPath, process.argv.slice(1), {
     detached: true
   }).unref();
   process.exit();
-}
+};
 
+const update_and_restart = () => {
+  update_sources_to_master(restart);
+};
