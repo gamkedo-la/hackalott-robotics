@@ -22,7 +22,7 @@ const server = http.createServer((req, res) => {
       + ", cycle = " + cycle + "</div>"
       + "<button onclick=\"window.location.href='/reboot'\" >RESTART</button>"
       + "</body></html>"
-      , "UTF-8");
+      , "utf8");
   }
   else if(req.method=="GET" && req.url=="/reboot") {
     res.statusCode = 200;
@@ -37,7 +37,7 @@ const server = http.createServer((req, res) => {
       + "</script>\n" 
       + "<body><div>RESTARTING NOW, PLEASE WAIT...</div></body>\n"
       + "</html>"
-      , "UTF-8", reboot);
+      , "utf8", reboot);
   }
   else   {
     res.statusCode = 200;
