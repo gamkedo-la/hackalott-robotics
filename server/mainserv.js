@@ -17,10 +17,29 @@ const server = http.createServer((req, res) => {
   {
     increment_access_counter();
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end("This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
-      + ", cycle = " + cycle + "\/n");
-  }  else   {
+    res.setHeader('Content-Type', 'text/html');
+    res.end("<html><body><div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
+      + ", cycle = " + cycle + "</div>"
+      + "<button onclick=\"window.location.href='/reboot'\" >RESTART</button>"
+      + "</body></html>"
+      , "UTF-8");
+  }
+  else if(req.method=="GET" && req.url=="/reboot") {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html');
+    res.end("<html>\n"
+      + "<script>\n"
+      + "  //Using setTimeout to execute a function after seconds.\n"
+      + "  setTimeout(function(){\n"
+      + "     //Redirect with JavaScript\n"
+      + "     window.location.href= '/';\n"
+      + "  }, 3000);\n"
+      + "</script>\n" 
+      + "<body><div>RESTARTING NOW, PLEASE WAIT...</div></body>\n"
+      + "</html>"
+      , "UTF-8", reboot);
+  }
+  else   {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
     res.end("Wrong url/n");
@@ -33,7 +52,6 @@ server.listen(port, hostname, () => {
 
 var update = function(){
   ++cycle;
-
 };
 
 setInterval(update, 100); // Run the game update
@@ -62,3 +80,14 @@ setInterval(update, 100); // Run the game update
 //     // close user connection
 //   });
 // });
+
+const {spawn} = require('child_process');
+
+const reboot = () => {
+  console.log("Rebooting...");
+  spawn(process.execPath, process.argv.slice(1), {
+    detached: true
+  }).unref();
+  process.exit();
+}
+
