@@ -34,9 +34,24 @@ const processPortFromArgs = () => {
 
 
 const http = require('http');
+const fs = require('fs');
 
 const hostname = '127.0.0.1'; 
 const port = processPortFromArgs();
+
+// Serve a file path relative to this file's directory.
+const serve_html = (file_path, response) => {
+  var path = `${__dirname}/${file_path}`;
+  console.log("Serving $file_path");
+  fs.readFile(path, { encoding: 'utf8'} , function(error, contents) {
+    if(error) {      
+      throw error;
+    }
+    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.write(contents);
+    response.end();
+  });
+};
 
 const server = http.createServer((req, res) => {
   if(req.method=="GET" && req.url=="/")
@@ -51,12 +66,7 @@ const server = http.createServer((req, res) => {
   }
   else if(req.method=="GET" && req.url=="/admin")
   {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    res.end("<html><body><div>ADMIN ACCESS</div>"
-      + "<button onclick=\"window.location.href='/restart'\" >UPDATE & RESTART</button>"
-      + "</body></html>"
-      , "utf8");
+    serve_html("admin.html", res);
   }
   else if(req.method=="GET" && req.url=="/restart") {
     res.statusCode = 200;
