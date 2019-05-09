@@ -1,4 +1,18 @@
 
+const print_arguments = () =>
+{
+  console.log("Server started with args : ");
+
+  process.argv.forEach((arg, idx) =>{
+    console.log("ARG[" + idx + "] : " + arg);
+  });
+
+  console.log("Working Directory: " + process.cwd());
+  
+};
+print_arguments();
+
+
 var access_counter = 0;
 var cycle = 0;
 
