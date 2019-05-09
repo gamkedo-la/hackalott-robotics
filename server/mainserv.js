@@ -40,16 +40,16 @@ const hostname = '127.0.0.1';
 const port = processPortFromArgs();
 
 // Serve a file path relative to this file's directory.
-const serve_html = (file_path, response) => {
+const serve_html = (file_path, response, then = ()=>{} ) => {
   var path = `${__dirname}/${file_path}`;
-  console.log("Serving $file_path");
+  console.log(`Serving ${path}`);
   fs.readFile(path, { encoding: 'utf8'} , function(error, contents) {
     if(error) {      
       throw error;
     }
     response.writeHead(200, {'Content-Type': 'text/html'});
     response.write(contents);
-    response.end();
+    response.end(then);
   });
 };
 
@@ -82,6 +82,9 @@ const server = http.createServer((req, res) => {
       + "<body><div>RESTARTING NOW, PLEASE WAIT...</div></body>\n"
       + "</html>"
       , "utf8", update_and_restart);
+  }
+  else if(req.method=="GET" && req.url=="/stop") {
+    serve_html("stopped.html", res, stop);
   }
   else   {
     res.statusCode = 200;
@@ -137,6 +140,10 @@ const restart = () => {
   spawn(process.execPath, process.argv.slice(1), {
     detached: true
   }).unref();
+  process.exit();
+};
+const stop = () => {
+  console.log("Stopping...");
   process.exit();
 };
 
