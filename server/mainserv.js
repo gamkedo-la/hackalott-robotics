@@ -32,7 +32,7 @@ const server = http.createServer((req, res) => {
     increment_access_counter();
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
-    res.end("<html><body><div><div>YES IT WORKS WHOOHOOOO</div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
+    res.end("<html><body><div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
       + ", cycle = " + cycle + "</div>"
       + "<button onclick=\"window.location.href='/restart'\" >UPDATE & RESTART</button>"
       + "</body></html>"
