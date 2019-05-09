@@ -70,19 +70,7 @@ const server = http.createServer((req, res) => {
     serve_html("admin.html", res);
   }
   else if(req.method=="GET" && req.url=="/restart") {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    res.end("<html>\n"
-      + "<script>\n"
-      + "  //Using setTimeout to execute a function after seconds.\n"
-      + "  setTimeout(function(){\n"
-      + "     //Redirect with JavaScript\n"
-      + "     window.location.href= '/';\n"
-      + "  }, 3000);\n"
-      + "</script>\n" 
-      + "<body><div>RESTARTING NOW, PLEASE WAIT...</div></body>\n"
-      + "</html>"
-      , "utf8", update_and_restart);
+    serve_html("restarting.html", res, update_and_restart);
   }
   else if(req.method=="GET" && req.url=="/stop") {
     serve_html("stopped.html", res, stop);
