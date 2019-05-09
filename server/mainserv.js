@@ -94,7 +94,7 @@ const update_cycle_tick_ms = 100;
 
 setInterval(update, update_cycle_tick_ms); // Run the game update
 
-const {spawn, execFile} = require('child_process');
+const {spawn, exec} = require('child_process');
 
 const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
 
@@ -105,11 +105,11 @@ const update_sources_to_master = (on_done) => {
         on_done();
   };
   const options = { cwd : source_dir };
-  execFile("git pull -r", options, (error, stdout, stderr) => {
+  exec("git pull -r", options, (error, stdout, stderr) => {
     if (error) {
       console.error("Source code update failed! -> " + error
         + "\nAttempting to abort source update...");
-      execFile("git rebase --abort", options, (error, stdout, stderr) => {
+      exec("git rebase --abort", options, (error, stdout, stderr) => {
         if(error)
         {
           console.error("Abort failed! -> " + error);
