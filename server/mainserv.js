@@ -97,6 +97,7 @@ setInterval(update, update_cycle_tick_ms); // Run the game update
 const {spawn, exec} = require('child_process');
 
 const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
+const update_commands_context = { cwd : source_dir };
 
 const update_sources_to_master = (on_done) => {
   console.log("Updating sources to last version of current branch...");
@@ -104,12 +105,12 @@ const update_sources_to_master = (on_done) => {
     console.log(stdout);
         on_done();
   };
-  const options = { cwd : source_dir };
-  exec("git pull -r", options, (error, stdout, stderr) => {
+  
+  exec("git pull -r", update_commands_context, (error, stdout, stderr) => {
     if (error) {
       console.error("Source code update failed! -> " + error
         + "\nAttempting to abort source update...");
-      exec("git rebase --abort", options, (error, stdout, stderr) => {
+      exec("git rebase --abort", update_commands_context, (error, stdout, stderr) => {
         if(error)
         {
           console.error("Abort failed! -> " + error);
@@ -122,6 +123,20 @@ const update_sources_to_master = (on_done) => {
       once_ready(stdout);
     }    
   });
+};
+
+const update_dependencies = (on_done) => {
+  return ()=> {
+    exec("npm ci", update_commands_context, (error, stdout, stderr) => {
+      if (error) {
+        // TODO: do something here? throw exception? fail everything?
+        throw error;
+      }
+      console.log(stdout);
+      on_done();
+    });  
+  };
+  
 };
 
 const restart = () => {
@@ -137,7 +152,7 @@ const stop = () => {
 };
 
 const update_and_restart = () => {
-  update_sources_to_master(restart);
+  update_sources_to_master(update_dependencies(restart));
 };
 
 // var WebSocketServer = require('websocket').server;
