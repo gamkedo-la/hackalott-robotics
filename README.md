@@ -20,9 +20,13 @@ Server setup
 ------------
 
 1. Install `NodeJs` v12.1 or compatible with `npm`.
-   Note that `websocket` will be installed automatically.
+   Note that `websocket` and other dependencies will be installed automatically in following steps.
 2. Clone this repository (say in directory `~/prototype`).
-3. To run the game server using NodeJS server:
+3. Go in the cloned directory (say `cd prototype`).
+4. Let `npm` install the dependencies: 
+   - If you intend to develop: run `npm install`
+   - If you just want to run the server (for production or CI): run `npm ci`
+5. To run the game server using NodeJS server:
    1. Go in the `./server/` directory.
    2.a. Run: `node server/mainserv.js` (no debugging)
    2.b. To enable debugging, run: `node server/mainserv.js --inspect=127.0.0.1:3030` (replace the port by something useful for you).
