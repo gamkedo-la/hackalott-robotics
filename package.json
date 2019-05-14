@@ -1,0 +1,16 @@
+{
+  "name": "prototype-nodejs",
+  "version": "0.1.0",
+  "description": "Prototype using nodejs for checking multiplayer case using JS in Gamkedo club context",
+  "main": "index.html",
+  "author": "Klaim",
+  "dependencies": {
+    "websocket": "^1.0.28"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Klaim/prototype-nodejs.git"
+  },
+  "license": "ISC",
+  "homepage": "https://github.com/Klaim/prototype-nodejs#readme"
+}
