@@ -40,15 +40,22 @@ const hostname = '127.0.0.1';
 const port = processPortFromArgs();
 
 // Serve a file path relative to this file's directory.
-const serve_html = (file_path, response, then = ()=>{} ) => {
+const serve_html = (file_path, response, then = ()=>{}, template_values = {} ) => {
   var path = `${__dirname}/${file_path}`;
   console.log(`Serving ${path}`);
   fs.readFile(path, { encoding: 'utf8'} , function(error, contents) {
     if(error) {      
       throw error;
     }
+
+    let processed_content = contents;    
+    // replace all "{{value_name}}" in the html text by `template_values["value_name"]` - in case it's a template.
+    for (const [key, value] of Object.entries(template_values)) {
+      processed_content = processed_content.replace(`{{${key}}}`, value);
+    };
+
     response.writeHead(200, {'Content-Type': 'text/html'});
-    response.write(contents);
+    response.write(processed_content);
     response.end(then);
   });
 };
@@ -57,13 +64,10 @@ const server = http.createServer((req, res) => {
   if(req.method=="GET" && req.url=="/")
   {
     increment_access_counter();
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    res.end("<html><body><div>This is klaim\'s multiplayer js game prototype, yay! Access = " + access_counter 
-      + ", cycle = " + cycle + "</div>"
-      + "<div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>"
-      + "</body></html>"
-      , "utf8");
+    serve_html("../index.html", res, ()=>{}, {
+      "access_counter" : access_counter,
+      "cycle" : cycle
+    });
   }
   else if(req.method=="GET" && req.url=="/admin")
   {
@@ -180,7 +184,7 @@ const update_and_restart = () => {
 //     return;
 //   }
   
-//   var connection = request.accept('echo-protocol', request.origin);
+//   var connection = request.accept('game-protocol', request.origin);
 //   console.log((new Date()) + ' Connection accepted.');
 //   connection.on('message', function(message) {
 //       if (message.type === 'utf8') {
