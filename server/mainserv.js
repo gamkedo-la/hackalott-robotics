@@ -36,10 +36,11 @@ const processPortFromArgs = () => {
 const http = require('http');
 const fs = require('fs');
 
-const hostname = '127.0.0.1'; 
+const hostname = '127.0.0.1';       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();
 
-// Serve a file path relative to this file's directory.
+// Serve an html file path relative to this file's directory.
+// Replace all "{{value_name}}" in the html text by `template_values["value_name"]` - in case it's a template.
 const serve_html = (file_path, response, then = ()=>{}, template_values = {} ) => {
   var path = `${__dirname}/${file_path}`;
   console.log(`Serving ${path}`);
@@ -49,7 +50,6 @@ const serve_html = (file_path, response, then = ()=>{}, template_values = {} ) =
     }
 
     let processed_content = contents;    
-    // replace all "{{value_name}}" in the html text by `template_values["value_name"]` - in case it's a template.
     for (const [key, value] of Object.entries(template_values)) {
       processed_content = processed_content.replace(`{{${key}}}`, value);
     };
