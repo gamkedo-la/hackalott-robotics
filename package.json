@@ -4,7 +4,9 @@
   "description": "Prototype using nodejs for checking multiplayer case using JS in Gamkedo club context",
   "main": "index.html",
   "author": "Klaim",
-  "engines" : { "node" : "^12.2" },
+  "engines": {
+    "node": "^12.2"
+  },
   "dependencies": {
     "ws": "^7.0.0"
   },
