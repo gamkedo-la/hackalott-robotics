@@ -35,6 +35,7 @@ const processPortFromArgs = () => {
 
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
 const util = require('util');
 
 const hostname = '127.0.0.1';       // TODO: make this an optional CLI parametter
@@ -52,24 +53,24 @@ const process_html_template = (html_content, template_values) => {
 
 // Serve an processed html (template) file path relative to this file's directory.
 const serve_html = async (file_path, response, template_values = {} ) => {
-      var path = `${__dirname}/${file_path}`;
-      console.log(`Serving ${path}`);
+      let html_path = path.join(__dirname, file_path); // TODO: search from the root directory of the project instead?
+      console.log(`Serving ${html_path}`);
       var contents;
       try{
-        contents = await fs.promises.readFile(path, { encoding: 'utf8'});
+        contents = await fs.promises.readFile(html_path, { encoding: 'utf8'});
       }
       catch(error){
         response.end(`SERVER ERROR: ${error}`);
         return;
       }
         
-      // console.log(`Processing ${path} ...`);
+      // console.log(`Processing ${html_path} ...`);
       let processed_content = process_html_template(contents, template_values);
 
-      // console.log(`Sending processed ${path} ...`);
+      // console.log(`Sending processed ${html_path} ...`);
       response.writeHead(200, {'Content-Type': 'text/html'});
       response.end(processed_content);
-      console.log(`Sending processed ${path} - Done`);  
+      console.log(`Sending processed ${html_path} - Done`);  
 };
 
 const server = http.createServer((req, res) => {
