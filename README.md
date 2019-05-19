@@ -25,7 +25,7 @@ It also exposes `index.html` by default, which uses `./client`.
 Server setup
 ------------
 
-1. Install `NodeJs` **v12.1** or compatible (this will also install `npm`).
+1. Install `NodeJs` **v10.15** or compatible (this will also install `npm`) (should also work with **v12**).
     On Ubuntu LTS, because the NodeJS package version might be older, you might need to use NodeJS's PPA as explained there: https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/
 2. Clone this repository (say in directory `~/prototype`).
 3. Go in the cloned directory (say `cd prototype`).
