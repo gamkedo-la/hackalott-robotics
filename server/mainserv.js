@@ -1,4 +1,6 @@
 
+// This is the main server file that should be run by NodeJS.
+
 const print_arguments = () =>
 {
   console.log("Server started with args : ");
@@ -13,7 +15,6 @@ const print_arguments = () =>
 print_arguments();
 
 var access_counter = 0;
-var cycle = 0;
 
 var increment_access_counter = function(){
   ++access_counter;
@@ -32,65 +33,34 @@ const processPortFromArgs = () => {
   return port;
 }
 
+const gameloop = require('./gameloop');
+gameloop.start(); // Start the game even if there is no connections yet.
 
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+const admin = require('./admin');
+const html = require('./html_utils');
 
 const hostname = '127.0.0.1';       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();
-
-
-// Replace all "{{value_name}}" in the html text by `template_values["value_name"]` - in case it's a template
-const process_html_template = (html_content, template_values) => {
-  let processed_content = html_content;    // We don't want to change the original.
-  for (const [key, value] of Object.entries(template_values)) {
-    processed_content = processed_content.replace(`{{${key}}}`, value);
-  };
-  return processed_content;
-}
-
-// Serve an processed html (template) file path relative to this file's directory.
-const serve_html = async (file_path, response, template_values = {} ) => {
-      let html_path = path.join(__dirname, file_path); // TODO: search from the root directory of the project instead?
-      console.log(`Serving ${html_path}`);
-      var contents;
-      try{
-        contents = await fs.promises.readFile(html_path, { encoding: 'utf8'});
-      }
-      catch(error){
-        response.end(`SERVER ERROR: ${error}`);
-        return;
-      }
-        
-      // console.log(`Processing ${html_path} ...`);
-      let processed_content = process_html_template(contents, template_values);
-
-      // console.log(`Sending processed ${html_path} ...`);
-      response.writeHead(200, {'Content-Type': 'text/html'});
-      response.end(processed_content);
-      console.log(`Sending processed ${html_path} - Done`);  
-};
 
 const server = http.createServer((req, res) => {
   if(req.method=="GET" && req.url=="/")
   {
     increment_access_counter();
-    serve_html("../index.html", res, {
+    html.serve("../index.html", res, {
       "access_counter" : access_counter,
-      "cycle" : cycle
+      "cycle" : gameloop.update_cycle()
     });
   }
   else if(req.method=="GET" && req.url=="/admin")
   {
-    serve_html("admin.html", res);
+    html.serve("admin.html", res);
   }
   else if(req.method=="GET" && req.url=="/restart") {
-    serve_html("restarting.html", res).then(update_and_restart);
+    html.serve("restarting.html", res).then(admin.update_and_restart);
   }
   else if(req.method=="GET" && req.url=="/stop") {
-    serve_html("stopped.html", res).then(stop);
+    html.serve("stopped.html", res).then(admin.stop);
   }
   else   {
     // TODO: replace this by an html file.
@@ -104,104 +74,5 @@ server.listen(port, hostname, () => {
   console.log(`Server running at ${hostname}:${port}`);
 });
 
-var update = function(){
-  ++cycle;
-};
-
-const update_cycle_tick_ms = 100;
-
-setInterval(update, update_cycle_tick_ms); // Run the game update
-
-const child_process = require('child_process');
-const exec = util.promisify(child_process.exec);
-const spawn = child_process.spawn;
-
-const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
-const update_commands_context = { cwd : source_dir };
-
-const update_sources_to_master = async () => {
-  console.log("Updating sources to last version of current branch...");
-  try{
-    let {stdout, stderr} = await exec("git pull -r", update_commands_context);    
-    console.log(stdout);
-    return; // If everything is fine, just stop there.
-  }
-  catch(error){
-    console.error("Source code update failed! -> " + error);
-  }
-
-  console.log("Attempting to abort source update...");
-  try{    
-    let {stdout, stderr} = await exec("git rebase --abort", update_commands_context);
-    console.log(stdout);
-  }
-  catch(error){
-    console.error("Abort failed! -> " + error);
-  }
-};
-
-const update_dependencies = async (on_done) => {
-  let {stdout, stderr} = await exec("npm ci", update_commands_context);
-  console.log(stdout);  
-};
-
-const restart = () => {
-  console.log("Restarting...");
-  spawn(process.execPath, process.argv.slice(1), {
-    detached: true
-  }).unref();
-  process.exit();
-};
-
-const stop = () => {
-  console.log("Stopping...");
-  process.exit();
-};
-
-const update_and_restart = async () => {
-  return await update_sources_to_master()
-    .then(update_dependencies)
-    .then(restart);
-};
-
-// var WebSocketServer = require('websocket').server;
-
-// var wsServer = new WebSocketServer({
-//   httpServer: server,
-//   // You should not use autoAcceptConnections for production
-//   // applications, as it defeats all standard cross-origin protection
-//   // facilities built into the protocol and the browser.  You should
-//   // *always* verify the connection's origin and decide whether or not
-//   // to accept it.
-//   autoAcceptConnections: false
-// });
-
-// function clientIsAllowed(origin) {
-//   // put logic here to detect whether the specified origin is allowed.
-//   return true;
-// }
-
-// wsServer.on('request', function(request) {
-//   if (!clientIsAllowed(request.origin)) {
-//     // Make sure we only accept requests from an allowed origin
-//     request.reject();
-//     console.log((new Date()) + ' Connection from client ' + request.origin + ' rejected.');
-//     return;
-//   }
-  
-//   var connection = request.accept('game-protocol', request.origin);
-//   console.log((new Date()) + ' Connection accepted.');
-//   connection.on('message', function(message) {
-//       if (message.type === 'utf8') {
-//           console.log('Received Message: ' + message.utf8Data);
-//           connection.sendUTF(message.utf8Data);
-//       }
-//       else if (message.type === 'binary') {
-//           console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-//           connection.sendBytes(message.binaryData);
-//       }
-//   });
-//   connection.on('close', function(reasonCode, description) {
-//       console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-//   });
-// });
+const ws_server = require("./websocketserv");
+ws_server.start_server(/* TODO: add hostname and port here */);
