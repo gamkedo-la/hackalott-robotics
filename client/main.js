@@ -32,10 +32,10 @@ const connect_to_server = (server_url)=>{
     console.log(`Connecting to ${ws_url} through WebSocket...`);
     websocket = new WebSocket(ws_url);
 
-    websocket.onerror = on_received_error;
-    websocket.onmessage = on_received_message;
-    websocket.onopen = on_connection_open;
-    websocket.onclose = on_connection_closed;
+    websocket.addEventListener("error", on_received_error);
+    websocket.addEventListener("message", on_received_message);
+    websocket.addEventListener("open", on_connection_open);
+    websocket.addEventListener("close", on_connection_closed);
 };
 
 const on_received_error = (error) => {
