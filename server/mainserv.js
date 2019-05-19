@@ -33,24 +33,6 @@ const processPortFromArgs = () => {
   return port;
 };
 
-const default_hostname = `127.0.0.1`;
-
-const processPublicHostnameFromArgs = () => {
-  var hostname = process.argv[3]; // We assume that the argument after port is the hostname
-  if(!hostname) {
-    let generated_hostname = `${default_hostname}:${port}`;
-    console.warn("Unspecified public hostname as 3rd argument: defaulting to " + generated_hostname);
-    hostname = generated_hostname;
-  }
-  
-  if(hostname.length <= 3) {
-    throw "Public host name is not valid: " + hostname;
-  }
-
-  console.log("PUBLIC HOSTNAME: " + hostname);
-  return hostname;
-};
-
 const gameloop = require('./gameloop');
 gameloop.start(); // Start the game even if there is no connections yet.
 
@@ -60,9 +42,8 @@ const admin = require('./admin');
 const html = require('./html_utils');
 
 const path = require('path');
-const hostname = default_hostname;       // TODO: make this an optional CLI parametter
+const hostname = "127.0.0.1";       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();
-const public_hostname = processPublicHostnameFromArgs();
 
 const http_server = http.createServer((req, res) => {
   if(req.method=="GET")
@@ -75,7 +56,7 @@ const http_server = http.createServer((req, res) => {
         "cycle" : gameloop.update_cycle(),
         "client_count" : ws_server.count_clients(),
         "server_code" : "document.getElementById('online_info').style.display='block';"
-            + `\nfield.set_default_server('${public_hostname}');`
+            + `\nfield.set_default_server(window.location.href);`
             + "\nfield.reset_server_hostname();"
 
       });
