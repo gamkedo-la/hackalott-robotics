@@ -1,7 +1,5 @@
+const game_config = require("../core/game_config");
 
-
-
-const update_cycle_tick_ms = 100;
 let update_cycle = 0;
 
 const update = () => {
@@ -11,7 +9,7 @@ const update = () => {
 
 const start_update_loop = ()=> {
     console.log("Starting game update loop.");
-    setInterval(update, update_cycle_tick_ms);
+    setInterval(update, game_config.update_cycle_tick_ms);
 };
 
 
