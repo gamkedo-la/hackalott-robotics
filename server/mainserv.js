@@ -37,45 +37,55 @@ const gameloop = require('./gameloop');
 gameloop.start(); // Start the game even if there is no connections yet.
 
 const http = require('http');
+const ws_server = require("./websocketserv");
 const admin = require('./admin');
 const html = require('./html_utils');
 
 const hostname = '127.0.0.1';       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();
 
-const server = http.createServer((req, res) => {
-  if(req.method=="GET" && req.url=="/")
+const http_server = http.createServer((req, res) => {
+  if(req.method=="GET")
+  {
+
+  }
+  if(req.url=="/")
   {
     increment_access_counter();
-    html.serve("../index.html", res, {
+    html.serve("index.html", res, {
       "access_counter" : access_counter,
-      "cycle" : gameloop.update_cycle()
+      "cycle" : gameloop.update_cycle(),
+      "client_count" : ws_server.count_clients(),
+      "server_code" : "document.getElementById('online_info').style.display='block';\n"
+          + `field.set_default_url(window.location.hostname);`
     });
   }
-  else if(req.method=="GET" && req.url=="/admin")
+  else if(req.url=="/admin")
   {
     html.serve("admin.html", res);
   }
-  else if(req.method=="GET" && req.url=="/restart") {
+  else if(req.url=="/restart") {
     html.serve("restarting.html", res).then(admin.update_and_restart);
   }
-  else if(req.method=="GET" && req.url=="/quick-restart") {
+  else if(req.url=="/quick-restart") {
     html.serve("restarting.html", res).then(admin.restart);
   }
-  else if(req.method=="GET" && req.url=="/stop") {
+  else if(req.url=="/stop") {
     html.serve("stopped.html", res).then(admin.stop);
   }
-  else   {
-    // TODO: replace this by an html file.
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end("Wrong url/n");
+  // We allow accessing all client files.
+  else if(req.url.startsWith("/client/") || req.url.startsWith("/core/"))
+  {
+    html.serve(req.url, res);
+  }
+  // Request not understood or file not found:
+  else {
+    html.serve_file_not_found(req.url, res);
   }  
 });
 
-server.listen(port, hostname, () => {
+http_server.listen(port, hostname, () => {
   console.log(`Server running at ${hostname}:${port}`);
 });
 
-const ws_server = require("./websocketserv");
-ws_server.start_server(/* TODO: add hostname and port here */);
+ws_server.start_server(http_server);

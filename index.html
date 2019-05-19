@@ -1,4 +1,29 @@
-<html><body>
-    <div>This is klaim's multiplayer js game prototype, yay! Access = {{access_counter}}, cycle = {{cycle}}</div>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+    </head>
+<body>
+    <div><strong>This is klaim's multiplayer js game prototype, yay!</strong></div>
+    <br/>
+    <div id="online_info" style="display: none;">
+        Online Status for This Server:
+        <ul>
+            <li>Access count since last reboot = {{access_counter}} (on cycle = {{cycle}})</li>
+            <li>Number of people connected: {{client_count}}</li>
+        </ul>
+    </div>
+    <div>
+        Server: <input id="server_url" type="text" style="width: 400px"></input>
+        <button onclick="field.reset_server_url();">Reset</button>
+        <button onclick="client.connect_to_server(field.server_url.value);">Play Online</button>
+        
+    </div>
+
     <div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>
-</body></html>
+
+    
+</body>
+<script>{{server_code}}</script>
+<script src="./client/main.js" ></script>
+</html>

@@ -1,45 +1,35 @@
 
-// var WebSocketServer = require('websocket').server;
+const WebSocket = require('ws');
 
-// var wsServer = new WebSocketServer({
-//   httpServer: server,
-//   // You should not use autoAcceptConnections for production
-//   // applications, as it defeats all standard cross-origin protection
-//   // facilities built into the protocol and the browser.  You should
-//   // *always* verify the connection's origin and decide whether or not
-//   // to accept it.
-//   autoAcceptConnections: false
-// });
+var ws_server; // Our WebSocket server, set only after start_server() have been called.
 
-// function clientIsAllowed(origin) {
-//   // put logic here to detect whether the specified origin is allowed.
-//   return true;
-// }
+const start_server = (http_server) => {
+    console.log("Starting WebSocket server...");
 
-// wsServer.on('request', function(request) {
-//   if (!clientIsAllowed(request.origin)) {
-//     // Make sure we only accept requests from an allowed origin
-//     request.reject();
-//     console.log((new Date()) + ' Connection from client ' + request.origin + ' rejected.');
-//     return;
-//   }
-  
-//   var connection = request.accept('game-protocol', request.origin);
-//   console.log((new Date()) + ' Connection accepted.');
-//   connection.on('message', function(message) {
-//       if (message.type === 'utf8') {
-//           console.log('Received Message: ' + message.utf8Data);
-//           connection.sendUTF(message.utf8Data);
-//       }
-//       else if (message.type === 'binary') {
-//           console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-//           connection.sendBytes(message.binaryData);
-//       }
-//   });
-//   connection.on('close', function(reasonCode, description) {
-//       console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-//   });
-// });
+    ws_server = new WebSocket.Server({ 
+        server: http_server, 
+        clientTracking: true 
+    });
+ 
+    ws_server.on('connection', function connection(ws) {
+        console.log(`New client: ${ws.url}` );
+        ws.on('message', function incoming(message) {
+            console.log(`received: ${message}`);
+        });
+        
+        ws.send('something');
+    });
 
+    console.log("Starting WebSocket server - DONE");
+};
 
-module.exports.start_server = ()=>{ console.log("Websocket server would start now IF IT WAS IMPLEMENTED!"); }
+const count_clients = ()=>{ 
+    if(ws_server) {
+        return ws_server.clients.size;
+    } else {
+        return 0;
+    }
+};
+
+module.exports.start_server = start_server;
+module.exports.count_clients = count_clients;
