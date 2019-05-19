@@ -39,32 +39,40 @@ const fs = require('fs');
 const hostname = '127.0.0.1';       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();
 
-// Serve an html file path relative to this file's directory.
-// Replace all "{{value_name}}" in the html text by `template_values["value_name"]` - in case it's a template.
-const serve_html = (file_path, response, then = ()=>{}, template_values = {} ) => {
-  var path = `${__dirname}/${file_path}`;
-  console.log(`Serving ${path}`);
-  fs.readFile(path, { encoding: 'utf8'} , function(error, contents) {
-    if(error) {      
-      throw error;
-    }
 
-    let processed_content = contents;    
-    for (const [key, value] of Object.entries(template_values)) {
-      processed_content = processed_content.replace(`{{${key}}}`, value);
-    };
+// Replace all "{{value_name}}" in the html text by `template_values["value_name"]` - in case it's a template
+const process_html_template = (html_content, template_values) => {
+  let processed_content = html_content;    // We don't want to change the original.
+  for (const [key, value] of Object.entries(template_values)) {
+    processed_content = processed_content.replace(`{{${key}}}`, value);
+  };
+  return processed_content;
+}
 
-    response.writeHead(200, {'Content-Type': 'text/html'});
-    response.write(processed_content);
-    response.end(then);
-  });
+// Serve an processed html (template) file path relative to this file's directory.
+const serve_html = (file_path, response, template_values = {} ) => {
+      var path = `${__dirname}/${file_path}`;
+      console.log(`Serving ${path}`);
+      return fs.promises.readFile(path, { encoding: 'utf8'})
+        .then((contents) => {        
+          // console.log(`Processing ${path} ...`);
+          let processed_content = process_html_template(contents, template_values);
+
+          // console.log(`Sending processed ${path} ...`);
+          response.writeHead(200, {'Content-Type': 'text/html'});
+          response.end(processed_content);
+          console.log(`Sending processed ${path} - Done`);
+        
+        }, (error)=>{
+          response.end(`SERVER ERROR: ${error}`);
+        });
 };
 
 const server = http.createServer((req, res) => {
   if(req.method=="GET" && req.url=="/")
   {
     increment_access_counter();
-    serve_html("../index.html", res, ()=>{}, {
+    serve_html("../index.html", res, {
       "access_counter" : access_counter,
       "cycle" : cycle
     });
@@ -74,12 +82,13 @@ const server = http.createServer((req, res) => {
     serve_html("admin.html", res);
   }
   else if(req.method=="GET" && req.url=="/restart") {
-    serve_html("restarting.html", res, update_and_restart);
+    serve_html("restarting.html", res).then(update_and_restart);
   }
   else if(req.method=="GET" && req.url=="/stop") {
-    serve_html("stopped.html", res, stop);
+    serve_html("stopped.html", res).then(stop);
   }
   else   {
+    // TODO: replace this by an html file.
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
     res.end("Wrong url/n");
