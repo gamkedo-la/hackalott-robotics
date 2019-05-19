@@ -12,6 +12,7 @@
             <li>Access count since last reboot = {{access_counter}} (on cycle = {{cycle}})</li>
             <li>Number of people connected: {{client_count}}</li>
         </ul>
+        <div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>
     </div>
     <div>
         Server: <input id="server_hostname" type="text" style="width: 300px"></input>
@@ -22,7 +23,7 @@
         <button ><h3>Play Offline</h3>Play solo with no need for any server.</button>
     </div>
 
-    <div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>
+    
 </body>
 <script src="./client/main.js" ></script>
 <script>{{server_code}}</script>
