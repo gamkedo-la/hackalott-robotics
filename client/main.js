@@ -17,22 +17,43 @@ const from_http_to_websocket = (url)=>{
     return ws_url;
 };
 
-let client = {
-    websocket: undefined, // Until conenct_to_server() is called.
-    connect_to_server: (server_url)=>{
-        let ws_url = from_http_to_websocket(server_url);
 
-        if(!ws_url.startsWith("ws"))
-        {
-            throw "Server url must have a valid protocol (http, https, ws, wss), for example: " 
-                + default_server_hostname + " or " + from_http_to_websocket(default_server_hostname);
-        }
+var websocket = undefined; // Until conenct_to_server() is called.
 
-        console.log(`Connecting to ${ws_url} through WebSocket...`);
-        websocket = new WebSocket(ws_url);
+const connect_to_server = (server_url)=>{
+    let ws_url = from_http_to_websocket(server_url);
+
+    if(!ws_url.startsWith("ws"))
+    {
+        throw "Server url must have a valid protocol (http, https, ws, wss), for example: " 
+            + default_server_hostname + " or " + from_http_to_websocket(default_server_hostname);
     }
 
+    console.log(`Connecting to ${ws_url} through WebSocket...`);
+    websocket = new WebSocket(ws_url);
+
+    websocket.onerror = on_received_error;
+    websocket.onmessage = on_received_message;
+    websocket.onopen = on_connection_open;
+    websocket.onclose = on_connection_closed;
 };
+
+const on_received_error = (error) => {
+    console.error("Connection to server ERROR: " + error);
+};
+
+const on_received_message = (message) => {
+    console.log("Received message: " + message);
+};
+
+const on_connection_open = (event) => {
+    console.log("Connection to server: OK");
+};
+
+const on_connection_closed = (event) => {
+    console.log("Connection to server: CLOSED");
+}
+
 
 
 
