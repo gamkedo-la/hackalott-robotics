@@ -35,6 +35,7 @@ const processPortFromArgs = () => {
 
 const http = require('http');
 const fs = require('fs');
+const util = require('util');
 
 const hostname = '127.0.0.1';       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();
@@ -50,22 +51,25 @@ const process_html_template = (html_content, template_values) => {
 }
 
 // Serve an processed html (template) file path relative to this file's directory.
-const serve_html = (file_path, response, template_values = {} ) => {
+const serve_html = async (file_path, response, template_values = {} ) => {
       var path = `${__dirname}/${file_path}`;
       console.log(`Serving ${path}`);
-      return fs.promises.readFile(path, { encoding: 'utf8'})
-        .then((contents) => {        
-          // console.log(`Processing ${path} ...`);
-          let processed_content = process_html_template(contents, template_values);
-
-          // console.log(`Sending processed ${path} ...`);
-          response.writeHead(200, {'Content-Type': 'text/html'});
-          response.end(processed_content);
-          console.log(`Sending processed ${path} - Done`);
+      var contents;
+      try{
+        contents = await fs.promises.readFile(path, { encoding: 'utf8'});
+      }
+      catch(error){
+        response.end(`SERVER ERROR: ${error}`);
+        return;
+      }
         
-        }, (error)=>{
-          response.end(`SERVER ERROR: ${error}`);
-        });
+      // console.log(`Processing ${path} ...`);
+      let processed_content = process_html_template(contents, template_values);
+
+      // console.log(`Sending processed ${path} ...`);
+      response.writeHead(200, {'Content-Type': 'text/html'});
+      response.end(processed_content);
+      console.log(`Sending processed ${path} - Done`);  
 };
 
 const server = http.createServer((req, res) => {
@@ -107,65 +111,56 @@ const update_cycle_tick_ms = 100;
 
 setInterval(update, update_cycle_tick_ms); // Run the game update
 
-const {spawn, exec} = require('child_process');
+const child_process = require('child_process');
+const exec = util.promisify(child_process.exec);
+const spawn = child_process.spawn;
 
 const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
 const update_commands_context = { cwd : source_dir };
 
-const update_sources_to_master = (on_done) => {
+const update_sources_to_master = async () => {
   console.log("Updating sources to last version of current branch...");
-  var once_ready = (stdout) => {
+  try{
+    let {stdout, stderr} = await exec("git pull -r", update_commands_context);    
     console.log(stdout);
-        on_done();
-  };
-  
-  exec("git pull -r", update_commands_context, (error, stdout, stderr) => {
-    if (error) {
-      console.error("Source code update failed! -> " + error
-        + "\nAttempting to abort source update...");
-      exec("git rebase --abort", update_commands_context, (error, stdout, stderr) => {
-        if(error)
-        {
-          console.error("Abort failed! -> " + error);
-        }
-        once_ready(stdout);
-      });
-    }
-    else
-    {
-      once_ready(stdout);
-    }    
-  });
+    return; // If everything is fine, just stop there.
+  }
+  catch(error){
+    console.error("Source code update failed! -> " + error);
+  }
+
+  console.log("Attempting to abort source update...");
+  try{    
+    let {stdout, stderr} = await exec("git rebase --abort", update_commands_context);
+    console.log(stdout);
+  }
+  catch(error){
+    console.error("Abort failed! -> " + error);
+  }
 };
 
-const update_dependencies = (on_done) => {
-  return ()=> {
-    exec("npm ci", update_commands_context, (error, stdout, stderr) => {
-      if (error) {
-        // TODO: do something here? throw exception? fail everything?
-        throw error;
-      }
-      console.log(stdout);
-      on_done();
-    });  
-  };
-  
+const update_dependencies = async (on_done) => {
+  let {stdout, stderr} = await exec("npm ci", update_commands_context);
+  console.log(stdout);  
 };
 
 const restart = () => {
-  console.log("Rebooting...");
+  console.log("Restarting...");
   spawn(process.execPath, process.argv.slice(1), {
     detached: true
   }).unref();
   process.exit();
 };
+
 const stop = () => {
   console.log("Stopping...");
   process.exit();
 };
 
-const update_and_restart = () => {
-  update_sources_to_master(update_dependencies(restart));
+const update_and_restart = async () => {
+  return await update_sources_to_master()
+    .then(update_dependencies)
+    .then(restart);
 };
 
 // var WebSocketServer = require('websocket').server;
