@@ -62,22 +62,22 @@ const http_server = http.createServer((req, res) => {
   }
   else if(req.url=="/admin")
   {
-    html.serve("admin.html", res);
+    html.serve("server/admin.html", res);
   }
   else if(req.url=="/restart") {
-    html.serve("restarting.html", res).then(admin.update_and_restart);
+    html.serve("server/restarting.html", res).then(admin.update_and_restart);
   }
   else if(req.url=="/quick-restart") {
-    html.serve("restarting.html", res).then(admin.restart);
+    html.serve("server/restarting.html", res).then(admin.restart);
   }
   else if(req.url=="/stop") {
-    html.serve("stopped.html", res).then(admin.stop);
+    html.serve("server/stopped.html", res).then(admin.stop);
   }
   // We allow accessing all client files.
   else if(req.url.startsWith("/client/") || req.url.startsWith("/core/"))
   {
     html.serve(req.url, res);
-  }
+  }  
   // Request not understood or file not found:
   else {
     html.serve_file_not_found(req.url, res);
