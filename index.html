@@ -15,14 +15,14 @@
     </div>
     <div>
         Server: <input id="server_hostname" type="text" style="width: 300px"></input>
-        <button onclick="field.reset_server_hostname();">Reset</button>
-        <button onclick="client.connect_to_server(field.server_hostname.value);">Play Online</button>
-        
+        <button onclick="field.reset_server_hostname();">Reset</button>     
+    </div>
+    <div>
+        <button onclick="client.connect_to_server(field.server_hostname.value);"><h3>Play Online</h3>Play with other players on a remote or LAN server.</button>   
+        <button ><h3>Play Offline</h3>Play solo with no need for any server.</button>
     </div>
 
     <div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>
-
-    
 </body>
 <script src="./client/main.js" ></script>
 <script>{{server_code}}</script>
