@@ -3,27 +3,47 @@
     <head>
         <meta charset="UTF-8">
     </head>
-<body>
-    <div><strong>This is klaim's multiplayer js game prototype, yay!</strong></div>
+<body style="background-color:whitesmoke">
+    <div><h2>This is klaim's multiplayer js game prototype, yay!</h2></div>
+    <div id="online_info" style="display: none; position:absolute; top:8px; right:8px; max-width: 300px; background-color: honeydew"">
+        <div id="online_info_box" style="display:none;">
+            <div style="float: right"> <a href='/admin'>admin access</a> </div>
+            <div style="float: left"> 
+                <button onclick="close_info_box();">close</button> 
+            </div>
+            <div >Online Status for This Server (when this page was received):
+                <ul>
+                    <li>Access count since last reboot = {{access_counter}} (on cycle = {{cycle}})</li>
+                    <li>Number of people connected: {{client_count}}</li>
+                </ul>
+            </div>
+        </div>
+        <div id="online_info_box_opener" style="float: left;">
+            <button onclick="open_info_box();">open server box</button> 
+        </div>        
+    </div>
+    <div id="connection_status_panel" style="background-color: darkslategrey; color:orangered;">
+        Status: Not Connected Yet.
+    </div>
     <br/>
-    <div id="online_info" style="display: none;">
-        Online Status for This Server (when this page was received):
-        <ul>
-            <li>Access count since last reboot = {{access_counter}} (on cycle = {{cycle}})</li>
-            <li>Number of people connected: {{client_count}}</li>
-        </ul>
-        <div style='position:absolute; top:8px; right:8px;'> <a href='/admin'>admin access</a> </div>
-    </div>
     <div>
-        Server: <input id="server_hostname" type="text" style="width: 300px"></input>
-        <button onclick="field.reset_server_hostname();">Reset</button>     
-    </div>
-    <div>
-        <button onclick="connect_to_server(field.server_hostname.value);"><h3>Play Online</h3>Play with other players on a remote or LAN server.</button>   
-        <button ><h3>Play Offline</h3>Play solo with no need for any server.</button>
-    </div>
+        <div id="connection_panel">
+            <div>
+                Server: <input id="server_hostname" type="text" style="width: 300px"></input>
+                <button id="button_server_reset" onclick="field.reset_server_hostname();">Reset</button>     
+            </div>
+            <div>
+                <button id="button_play_online" onclick="connect_to_server(field.server_hostname.value);"><h3>Play Online</h3>Play with other players on a remote or LAN server.</button>   
+                <button id="button_play_offline"><h3>Play Offline</h3>Play solo with no need for any server.</button>
+            </div>
+        </div>
+        <div id="game_panel" style="display: none; width:640px; height: 480px; background-color: green;">
+            <textarea id="chat_display">
 
-    
+            </textarea>
+        </div>
+    </div>    
+        
 </body>
 <script src="./client/main.js" ></script>
 <script>{{server_code}}</script>
