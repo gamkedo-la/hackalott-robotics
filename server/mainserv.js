@@ -59,6 +59,9 @@ const server = http.createServer((req, res) => {
   else if(req.method=="GET" && req.url=="/restart") {
     html.serve("restarting.html", res).then(admin.update_and_restart);
   }
+  else if(req.method=="GET" && req.url=="/quick-restart") {
+    html.serve("restarting.html", res).then(admin.restart);
+  }
   else if(req.method=="GET" && req.url=="/stop") {
     html.serve("stopped.html", res).then(admin.stop);
   }
