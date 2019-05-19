@@ -14,7 +14,7 @@ field.reset_server_hostname();
 let client = {
     websocket: undefined, // Until conenct_to_server() is called.
     connect_to_server: (server_url)=>{
-        let ws_url = `ws://${server_url}`;
+        let ws_url = `wss://${server_url}`;
         console.log(`Connecting to ${ws_url} through WebSocket...`);
         websocket = new WebSocket(ws_url);
 
