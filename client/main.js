@@ -73,8 +73,7 @@ const on_connection_closed = (event) => {
 
 const log_connection_status = (message) => {
     console.log(message);
-    field.connection_status_panel.textContent = message;
-    // TODO: add to the log instead of overwritting it.
+    field.connection_status_panel.innerHTML += "<div>" + message + "</div>";
 }
 
 const show_connection_status = (message = "") => {
