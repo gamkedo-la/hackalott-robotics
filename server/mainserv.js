@@ -1,8 +1,13 @@
+import gameloop from './gameloop.js';
+import http from 'http';
+import ws_server from "./websocketserv.js";
+import admin from './admin.js';
+import html from './html_utils.js';
 
-// This is the main server file that should be run by NodeJS.
+var access_counter = 0;
 
-const print_arguments = () =>
-{
+
+function print_arguments() {
   console.log("Server started with args : ");
 
   process.argv.forEach((arg, idx) =>{
@@ -12,15 +17,13 @@ const print_arguments = () =>
   console.log("Working Directory: " + process.cwd());
   
 };
-print_arguments();
 
-var access_counter = 0;
 
-var increment_access_counter = function(){
+function increment_access_counter() {
   ++access_counter;
 };
 
-const processPortFromArgs = () => {
+function processPortFromArgs() {
   var port = process.argv[2]; // We assume that the argument after the source file is the port to use.
   if(!port) {
     throw "Specify port as 2nd argument!";
@@ -33,19 +36,7 @@ const processPortFromArgs = () => {
   return port;
 };
 
-const gameloop = require('./gameloop');
-gameloop.start(); // Start the game even if there is no connections yet.
-
-const http = require('http');
-const ws_server = require("./websocketserv");
-const admin = require('./admin');
-const html = require('./html_utils');
-
-const path = require('path');
-const hostname = "127.0.0.1";       // TODO: make this an optional CLI parametter
-const port = processPortFromArgs();
-
-const http_server = http.createServer((req, res) => {
+function http_server_receive(req, res) {
   if(req.method=="GET")
   {
     if(req.url=="/")
@@ -55,10 +46,7 @@ const http_server = http.createServer((req, res) => {
         "access_counter" : access_counter,
         "cycle" : gameloop.update_cycle(),
         "client_count" : ws_server.count_clients(),
-        "server_code" : "document.getElementById('online_info').style.display='block';"
-            + `\nfield.set_default_server(window.location.href);`
-            + "\nfield.reset_server_hostname();"
-
+        "server_code" : "client.on_served_by_game_server();"
       });
     }
     else if(req.url=="/admin")
@@ -87,7 +75,19 @@ const http_server = http.createServer((req, res) => {
   else {
     html.serve_file_not_found(req.url, res);
   }
-});
+}
+
+////////////////////////////////////////////////
+//// MAIN EXECUTION STARTS HERE
+
+print_arguments();
+
+gameloop.start(); // Start the game even if there is no connections yet.
+
+const hostname = "127.0.0.1";       // TODO: make this an optional CLI parametter
+const port = processPortFromArgs();
+
+const http_server = http.createServer(http_server_receive);
 
 http_server.listen(port, hostname, () => {
   console.log(`Server running at ${hostname}:${port}`);

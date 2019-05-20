@@ -9,7 +9,7 @@
         <div id="online_info_box" style="display:none;">
             <div style="float: right"> <a href='/admin'>admin access</a> </div>
             <div style="float: left"> 
-                <button onclick="close_info_box();">close</button> 
+                <button id="button_close_online_info_box">close</button> 
             </div>
             <div >Online Status for This Server (when this page was received):
                 <ul>
@@ -19,7 +19,7 @@
             </div>
         </div>
         <div id="online_info_box_opener" style="float: left;">
-            <button onclick="open_info_box();">open server box</button> 
+            <button id="button_open_online_info_box">open server box</button> 
         </div>        
     </div>
     <div id="connection_status_panel" style="background-color: darkslategrey; color:orangered; width:300px; float:right; text-align: left;">
@@ -30,10 +30,10 @@
         <div id="connection_panel">
             <div>
                 Server: <input id="server_hostname" type="text" style="width: 300px"></input>
-                <button id="button_server_reset" onclick="field.reset_server_hostname();">Reset</button>     
+                <button id="button_server_reset">Reset</button>     
             </div>
             <div>
-                <button id="button_play_online" onclick="connect_to_server(field.server_hostname.value);"><h3>Play Online</h3>Play with other players on a remote or LAN server.</button>   
+                <button id="button_play_online" ><h3>Play Online</h3>Play with other players on a remote or LAN server.</button>   
                 <button id="button_play_offline"><h3>Play Offline</h3>Play solo with no need for any server.</button>
             </div>
         </div>
@@ -45,7 +45,10 @@
     </div>    
         
 </body>
-<script src="./core/game.js" ></script>
-<script src="./client/main.js" ></script>
-<script>{{server_code}}</script>
+<script type="module" src="./client/main.js" ></script>
+<script type="module">
+    import client from "./client/main.js";
+    const server_code = {}; // DO NOT REMOVE THIS LINE, IT's USED AS A FALLBACK IF THIS PAGE IS NOT SERVED BY OUR SERVER
+    {{server_code}}
+</script>
 </html>

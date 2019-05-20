@@ -1,13 +1,14 @@
 
-const util = require('util');
-const child_process = require('child_process');
+import util from 'util';
+import child_process from 'child_process';
+
 const exec = util.promisify(child_process.exec);
 const spawn = child_process.spawn;
 
 const source_dir = process.cwd(); // We assume that node's working directory is the source code directory
 const update_commands_context = { cwd : source_dir };
 
-const update_sources_to_master = async () => {
+async function update_sources_to_master() {
   console.log("Updating sources to last version of current branch...");
   try{
     let {stdout, stderr} = await exec("git pull -r", update_commands_context);    
@@ -28,12 +29,12 @@ const update_sources_to_master = async () => {
   }
 };
 
-const update_dependencies = async (on_done) => {
+async function update_dependencies(on_done) {
   let {stdout, stderr} = await exec("npm ci", update_commands_context);
   console.log(stdout);  
 };
 
-const restart = () => {
+function restart() {
   console.log("Restarting...");
   spawn(process.execPath, process.argv.slice(1), {
     detached: true
@@ -41,17 +42,15 @@ const restart = () => {
   process.exit();
 };
 
-const stop = () => {
+function stop() {
   console.log("Stopping...");
   process.exit();
 };
 
-const update_and_restart = async () => {
+async function update_and_restart() {
   return await update_sources_to_master()
     .then(update_dependencies)
     .then(restart);
 };
 
-module.exports.restart = restart;
-module.exports.update_and_restart = update_and_restart;
-module.exports.stop = stop;
+export default { stop, restart, update_and_restart };

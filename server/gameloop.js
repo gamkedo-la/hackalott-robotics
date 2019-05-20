@@ -1,12 +1,17 @@
-const {Game} = require("../core/game");
+import {Game} from "../core/game.js";
 
 var current_game = undefined;
-const start_update_loop = ()=> {
+
+function start() {
     current_game = new Game();
     current_game.start();
 };
 
+function stop() {
+    current_game.stop();
+    current_game = null;
+};
 
-// List here all things that needs to be usable by users of this module.
-module.exports.update_cycle = ()=>{ return current_game.update_cycle; };
-module.exports.start = start_update_loop;
+function update_cycle() { return current_game.update_cycle; }
+
+export default { start, stop, update_cycle };

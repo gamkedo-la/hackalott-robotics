@@ -1,34 +1,107 @@
+import {Game} from "../core/game.js";
 
 var default_server_hostname = "https://prototypenodejs.klaimsden.net"; // Used if the client is run in a local browser.
 
-let field = {
-    server_hostname : document.getElementById('server_hostname'),
-    connection_panel : document.getElementById('connection_panel'),
-    server_hostname : document.getElementById('server_hostname'),
-    button_server_reset : document.getElementById('button_server_reset'),
-    button_play_online : document.getElementById('button_play_online'),
-    button_play_offline : document.getElementById('button_play_offline'),
-    connection_status_panel: document.getElementById('connection_status_panel'),
-    game_panel : document.getElementById('game_panel'),
-    online_info_box : document.getElementById('online_info_box'),
-    online_info_box_opener : document.getElementById('online_info_box_opener'),
+var websocket = undefined; // Until conenct_to_server() is called.
+let ui = new MainPageUI();
 
-    reset_server_hostname : ()=>{ server_hostname.value = default_server_hostname; },
-    set_default_server : (new_default_url)=>{ default_server_hostname = new_default_url; }
+function MainPageUI(){
+
+    let server_hostname = document.getElementById('server_hostname');
+    let connection_panel = document.getElementById('connection_panel');
+    let button_server_reset = document.getElementById('button_server_reset');
+    let button_play_online = document.getElementById('button_play_online');
+    let button_play_offline = document.getElementById('button_play_offline');
+    let connection_status_panel = document.getElementById('connection_status_panel');
+    let game_panel = document.getElementById('game_panel');
+    let online_info_display = document.getElementById('online_info');
+    let online_info_box = document.getElementById('online_info_box');
+    let online_info_box_opener = document.getElementById('online_info_box_opener');
+    let button_open_online_info_box = document.getElementById('button_open_online_info_box');
+    let button_close_online_info_box = document.getElementById('button_close_online_info_box');
+
+    this.reset_server_hostname = function(){ server_hostname.value = default_server_hostname; };
+    this.set_default_server = function(new_default_url) { default_server_hostname = new_default_url; };
+    
+    this.log_connection_status = function (message) {
+        console.log(message);
+        connection_status_panel.innerHTML += "<div>" + message + "</div>";
+    };
+
+    this.show_connection_status = function (message = "") {
+        if(message.length != 0) {
+            this.log_connection_status(message);
+        }
+        connection_status_panel.style.display = "block";
+    };
+
+    this.hide_connection_status = function () {
+        connection_status_panel.style.display = "none";
+    };
+    
+    this.open_info_box = function () {
+        online_info_box.style.display = "block";
+        online_info_box_opener.style.display = "none";
+    };
+
+    this.close_info_box = function () {
+        online_info_box.style.display = "none";
+        online_info_box_opener.style.display = "block";
+    };
+
+    this.show_online_info = function () {
+        online_info_display.style.display = "block";
+    };
+       
+    this.show_connection_panel = function () {
+        connection_panel.style.display = "block";
+    };
+
+    this.hide_connection_panel = function () {
+        connection_panel.style.display = "none";
+    };
+
+    this.show_game_client = function () {
+        game_panel.style.display = "block";
+    };
+
+    this.hide_game_client = function () {
+        game_panel.style.display = "none";
+        game_panel.innerText = "";
+    };
+
+    //////////////////////////////////////////////////////
+    // Initialization:
+    button_play_online.onclick = ()=>{ 
+        connect_to_server(server_hostname.value); 
+    };
+
+    button_server_reset.onclick = ()=>{
+        this.reset_server_hostname();
+    };
+
+    button_open_online_info_box.onclick = ()=>{
+        this.open_info_box();
+    };
+
+    button_close_online_info_box.onclick = ()=>{
+        this.close_info_box();
+    };
+
+    this.reset_server_hostname();
+
 };
 
-field.reset_server_hostname();
 
-const from_http_to_websocket = (url)=>{
+function from_http_to_websocket(url) {
     var ws_url = url.replace("http://", "ws://");
     ws_url = ws_url.replace("https://", "wss://");
     return ws_url;
 };
 
 
-var websocket = undefined; // Until conenct_to_server() is called.
 
-const connect_to_server = (server_url)=>{
+function connect_to_server(server_url) {
     let ws_url = from_http_to_websocket(server_url);
 
     if(!ws_url.startsWith("ws"))
@@ -37,8 +110,8 @@ const connect_to_server = (server_url)=>{
             + default_server_hostname + " or " + from_http_to_websocket(default_server_hostname);
     }
 
-    hide_connection_panel();
-    show_connection_status(`Connecting to ${ws_url} through WebSocket...`);
+    ui.hide_connection_panel();
+    ui.show_connection_status(`Connecting to ${ws_url} through WebSocket...`);
 
     websocket = new WebSocket(ws_url);
     websocket.addEventListener("error", on_received_error);
@@ -47,68 +120,43 @@ const connect_to_server = (server_url)=>{
     websocket.addEventListener("close", on_connection_closed);
 };
 
-const on_received_error = (error) => {
+function on_received_error (error){
     let log = "Server Error: " + error;
     console.error(log);
-    show_connection_status(log);
+    ui.show_connection_status(log);
     stop_game_client();
 };
 
-const on_received_message = (message) => {
+function on_received_message(message) {
     console.log("Received message: " + message.data);
     // TODO: pass the message to the game handler
 };
 
-const on_connection_open = (event) => {
-    show_connection_status("Connection to server: OK");
+function on_connection_open(event) {
+    ui.show_connection_status("Connection to server: OK");
     start_game_client();
-    setTimeout(hide_connection_status, 2000); // Hide the connection status a bit later.
+    setTimeout(ui.hide_connection_status, 2000); // Hide the connection status a bit later.
 };
 
-const on_connection_closed = (event) => {
-    show_connection_status("Connection to server: CLOSED");
+function on_connection_closed(event) {
+    ui.show_connection_status("Connection to server: CLOSED");
     stop_game_client();
 }
 
-const log_connection_status = (message) => {
-    console.log(message);
-    field.connection_status_panel.innerHTML += "<div>" + message + "</div>";
+function on_served_by_game_server() {
+    ui.set_default_server(window.location.href);
+    ui.reset_server_hostname();
+    ui.show_online_info();
 }
 
-const show_connection_status = (message = "") => {
-    if(message.length != 0) {
-        log_connection_status(message);
-    }
-    field.connection_status_panel.style.display = "block";
-}
-const hide_connection_status = () => {
-    field.connection_status_panel.style.display = "none";
+function start_game_client(){
+    // TODO: Load the game client display here
+    ui.show_game_client();
 }
 
-const show_connection_panel = () => {
-    connection_panel.style.display = "block";
+function stop_game_client(){
+    ui.hide_game_client();
+    // TODO: ...
 }
 
-const hide_connection_panel = () => {
-    connection_panel.style.display = "none";
-}
-
-const start_game_client = () => {
-    game_panel.style.display = "block";
-    // TODO: inject game client display here and start update here.
-}
-
-const stop_game_client = () => {
-    game_panel.style.display = "none";
-    game_panel.innerText = "";
-}
-
-const open_info_box = () => {
-    field.online_info_box.style.display = "block";
-    field.online_info_box_opener.style.display = "none";
-}
-
-const close_info_box = () => {
-    field.online_info_box.style.display = "none";
-    field.online_info_box_opener.style.display = "block";
-}
+export default { connect_to_server, ui, on_served_by_game_server };
