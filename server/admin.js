@@ -37,7 +37,7 @@ async function update_dependencies(on_done) {
 
 function restart() {
   console.log("Restarting...");
-
+  // TODO: make the logfile even if we launch the game manually
   const logfile = `gameserver-${new Date().toISOString().replace(/:|T|\.|z/gi,"")}.log`;
   const out = fs.openSync(logfile, 'a');
   const err = fs.openSync(logfile, 'a');
