@@ -109,7 +109,9 @@ function from_http_to_websocket(url) {
     return ws_url;
 };
 
-
+function is_valid_login(login) {
+    return login.length >= 4;
+}
 
 function connect_to_server(server_url) {
     let ws_url = from_http_to_websocket(server_url);
@@ -120,7 +122,7 @@ function connect_to_server(server_url) {
     }
 
     ui.sanitize_player_login();    
-    if(ui.player_login().length < 4){
+    if(!is_valid_login(ui.player_login())){
         ui.log_connection_status("Invalid login!");
         return;
     }
