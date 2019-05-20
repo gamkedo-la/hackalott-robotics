@@ -75,6 +75,11 @@ function MainPageUI(){
         return player_login.value;
     };
 
+    this.sanitize_player_login = function(){        
+        player_login.value.trim();
+        player_login.value = player_login.value.replace(/\s/g, "_");
+    };
+
     //////////////////////////////////////////////////////
     // Initialization:
     button_play_online.onclick = ()=>{ 
@@ -114,10 +119,16 @@ function connect_to_server(server_url) {
             + default_server_hostname + " or " + from_http_to_websocket(default_server_hostname);
     }
 
+    ui.sanitize_player_login();    
+    if(ui.player_login().length < 4){
+        ui.log_connection_status("Invalid login!");
+        return;
+    }
+
     ui.hide_connection_panel();
     ui.show_connection_status(`Connecting to ${ws_url} through WebSocket...`);
 
-    websocket = new WebSocket(ws_url, ui.player_login.value);
+    websocket = new WebSocket(ws_url);
     websocket.addEventListener("error", on_received_error);
     websocket.addEventListener("message", on_received_message);
     websocket.addEventListener("open", on_connection_open);
