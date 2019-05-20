@@ -13,6 +13,7 @@ function MainPageUI(){
     let button_play_online = document.getElementById('button_play_online');
     let button_play_offline = document.getElementById('button_play_offline');
     let connection_status_panel = document.getElementById('connection_status_panel');
+    let player_login = document.getElementById('player_login');
     let game_panel = document.getElementById('game_panel');
     let online_info_display = document.getElementById('online_info');
     let online_info_box = document.getElementById('online_info_box');
@@ -70,6 +71,10 @@ function MainPageUI(){
         game_panel.innerText = "";
     };
 
+    this.player_login = function(){
+        return player_login.value;
+    };
+
     //////////////////////////////////////////////////////
     // Initialization:
     button_play_online.onclick = ()=>{ 
@@ -104,8 +109,7 @@ function from_http_to_websocket(url) {
 function connect_to_server(server_url) {
     let ws_url = from_http_to_websocket(server_url);
 
-    if(!ws_url.startsWith("ws"))
-    {
+    if(!ws_url.startsWith("ws")) {
         throw "Server url must have a valid protocol (http, https, ws, wss), for example: " 
             + default_server_hostname + " or " + from_http_to_websocket(default_server_hostname);
     }
@@ -113,7 +117,7 @@ function connect_to_server(server_url) {
     ui.hide_connection_panel();
     ui.show_connection_status(`Connecting to ${ws_url} through WebSocket...`);
 
-    websocket = new WebSocket(ws_url);
+    websocket = new WebSocket(ws_url, ui.player_login.value);
     websocket.addEventListener("error", on_received_error);
     websocket.addEventListener("message", on_received_message);
     websocket.addEventListener("open", on_connection_open);
@@ -128,6 +132,10 @@ function on_received_error (error){
 };
 
 function on_received_message(message) {
+    if(message.data.startsWith("login?")) {
+        websocket.send("login:" + ui.player_login());
+        return;
+    }
     console.log("Received message: " + message.data);
     // TODO: pass the message to the game handler
 };
@@ -135,7 +143,6 @@ function on_received_message(message) {
 function on_connection_open(event) {
     ui.show_connection_status("Connection to server: OK");
     start_game_client();
-    setTimeout(ui.hide_connection_status, 2000); // Hide the connection status a bit later.
 };
 
 function on_connection_closed(event) {

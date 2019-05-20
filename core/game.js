@@ -8,11 +8,10 @@ let next_player_id = 0;
 
 /* Represent one player connected to the game.
 */
-export const Player = function(name) {
+export function Player(name) {
     this.id = next_player_id++;
     this.name = name;
     this.commands = [];
-    this.event_listeners;
 
     this.acquire_last_commands = function(){
         // Once acquired, the commands should not be used anymore so we just return them.
@@ -26,10 +25,14 @@ export const Player = function(name) {
         this.commands.push(message);
     }
 
-    this
-
-    this.receive_event = function(event){
-
+    this.receive_events = function(events){
+        for(let listener of this.event_listeners){
+            try{
+                listener(events);
+            }catch(error) {
+                console.error("Player listener error: " + error);
+            }
+        }
     }
 };
 
@@ -45,7 +48,7 @@ export const Game = function() {
     this.event_listeners = [];
     
     // Setup the world!
-    this.World = new World();
+    this.world = new World();
 
     this.start = function(){
         console.log("Starting game update loop... (" + update_cycle_tick_ms + "ms lockstep)");
@@ -57,7 +60,7 @@ export const Game = function() {
         console.log("Stopping game update loop...");
         clearInterval(this.update_timer_id);
         console.log("Stopping game update loop - DONE");
-    }
+    };
 
     this.add_player = function(player){
         console.assert(player);
@@ -81,12 +84,12 @@ export const Game = function() {
             ++idx;
         }
         return undefined;
-    }
+    };
 
     this.add_event_listener = function(listener){
         console.assert(listener);
-        event_listeners.push(listener);
-    }
+        this.event_listeners.push(listener);
+    };
 
     this.remove_event_listener = function(listener){
         for(let idx = 0; idx < this.event_listeners.length; ++idx) {
@@ -94,18 +97,33 @@ export const Game = function() {
                 return this.event_listeners.splice(idx,1);
             }
         }
-    }
-
-    this.broadcast_events = function(events){
-        throw "NOT IMPLEMENTED YET";
-    }
-    
-
-    this.update_one_cycle = function(){
-        ++this.update_cycle;
-
-
     };
+
+    this.publish_events = function(events){
+        for(let observer of this.event_listeners){
+            try{
+                observer(events);
+            }catch(error){
+                console.log("Game listener failed: " + error);
+            }
+        }
+    };
+
+    
+    this.process_players_commands = function(){
+        // TODO: add players commands processing here
+    };
+
+
+    this.update_one_cycle = ()=>{
+        ++this.update_cycle;
+        this.process_players_commands();
+        this.world.update();
+        let events = this.world.last_events;
+        this.publish_events(events);
+            
+    };
+
 
 };
 
