@@ -1,4 +1,4 @@
-import gameloop from './gameloop.js';
+import gameserver from './gameserver.js';
 import http from 'http';
 import ws_server from "./websocketserv.js";
 import admin from './admin.js';
@@ -44,7 +44,7 @@ function http_server_receive(req, res) {
       increment_access_counter();
       html.serve("index.html", res, {
         "access_counter" : access_counter,
-        "cycle" : gameloop.update_cycle(),
+        "cycle" : gameserver.update_cycle(),
         "client_count" : ws_server.count_clients(),
         "server_code" : "client.on_served_by_game_server();"
       });
@@ -82,7 +82,7 @@ function http_server_receive(req, res) {
 
 print_arguments();
 
-gameloop.start(); // Start the game even if there is no connections yet.
+gameserver.start(); // Start the game even if there is no connections yet.
 
 const hostname = "127.0.0.1";       // TODO: make this an optional CLI parametter
 const port = processPortFromArgs();

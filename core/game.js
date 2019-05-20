@@ -46,6 +46,7 @@ export const Game = function() {
     this.update_timer_id = null;
     this.players = [];
     this.event_listeners = [];
+    this.command_handlers = new Map(); // "command type" => function (commands:[], player_source)
     
     // Setup the world!
     this.world = new World();
@@ -99,6 +100,10 @@ export const Game = function() {
         }
     };
 
+    this.setCommmandHandler = function(command_type, handler){
+        this.command_handlers[command_type] = handler;
+    }
+
     this.publish_events = function(events){
         for(let observer of this.event_listeners){
             try{
@@ -111,7 +116,12 @@ export const Game = function() {
 
     
     this.process_players_commands = function(){
-        // TODO: add players commands processing here
+        for(let player of this.players){
+            let commands = player.acquire_last_commands();
+            for(let command_handler of this.command_handlers){
+                command_handler(commands, player);
+            }            
+        }
     };
 
 

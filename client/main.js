@@ -1,8 +1,11 @@
 import {Game} from "../core/game.js";
+import {ChatClient} from "./chatclient.js";
 
 var default_server_hostname = "https://prototypenodejs.klaimsden.net"; // Used if the client is run in a local browser.
 
-var websocket = undefined; // Until conenct_to_server() is called.
+var websocket = undefined; // Until connect_to_server() is called.
+var local_game = undefined; // Until we launch a local game.
+var chat_client = undefined; // Until ui is ready
 let ui = new MainPageUI();
 
 function MainPageUI(){
@@ -21,6 +24,10 @@ function MainPageUI(){
     let button_open_online_info_box = document.getElementById('button_open_online_info_box');
     let button_close_online_info_box = document.getElementById('button_close_online_info_box');
 
+    let chat_history = document.getElementById("chat_history");
+    let chat_input = document.getElementById("chat_input");
+    let chat_send_button = document.getElementById("chat_send_button");
+    
     this.reset_server_hostname = function(){ server_hostname.value = default_server_hostname; };
     this.set_default_server = function(new_default_url) { default_server_hostname = new_default_url; };
     
@@ -86,6 +93,10 @@ function MainPageUI(){
         connect_to_server(server_hostname.value); 
     };
 
+    button_play_offline.onclick = ()=>{
+        start_local_game();
+    };
+
     button_server_reset.onclick = ()=>{
         this.reset_server_hostname();
     };
@@ -99,7 +110,7 @@ function MainPageUI(){
     };
 
     this.reset_server_hostname();
-
+    chat_client = new ChatClient(chat_history, chat_input, chat_send_button);
 };
 
 
@@ -135,6 +146,8 @@ function connect_to_server(server_url) {
     websocket.addEventListener("message", on_received_message);
     websocket.addEventListener("open", on_connection_open);
     websocket.addEventListener("close", on_connection_closed);
+    
+    chat_client.start_online(websocket, ui.player_login());
 };
 
 function on_received_error (error){
@@ -144,13 +157,23 @@ function on_received_error (error){
     stop_game_client();
 };
 
-function on_received_message(message) {
-    if(message.data.startsWith("login?")) {
-        websocket.send("login:" + ui.player_login());
-        return;
+function on_received_message(complete_message) {
+    if(typeof complete_message.data == "string"){
+        let message = complete_message.data;
+        if(message.startsWith("login?")) {
+            let login_info = "login:" + ui.player_login();
+            console.log("Received login info request, sending: '" + login_info + "'");
+            websocket.send(login_info);
+            return;
+        }            
+         
+        console.log("Received message: " + message);
+        // TODO: pass the message to the game handler
+    } else if(typeof complete_message.data =="array"){
+        for(let messaeg of complete_message.data){
+            console.log("Received message: " + message);
+        }
     }
-    console.log("Received message: " + message.data);
-    // TODO: pass the message to the game handler
 };
 
 function on_connection_open(event) {
@@ -177,6 +200,14 @@ function start_game_client(){
 function stop_game_client(){
     ui.hide_game_client();
     // TODO: ...
+}
+
+function start_local_game(){
+    ui.hide_connection_panel();
+    ui.show_connection_status(`Starting local game.`);
+    ui.show_game_client();
+
+    local_game = new Game();
 }
 
 export default { connect_to_server, ui, on_served_by_game_server };
