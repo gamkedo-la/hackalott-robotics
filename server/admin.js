@@ -1,5 +1,6 @@
 
 import util from 'util';
+import fs from 'fs';
 import child_process from 'child_process';
 
 const exec = util.promisify(child_process.exec);
@@ -36,8 +37,17 @@ async function update_dependencies(on_done) {
 
 function restart() {
   console.log("Restarting...");
-  spawn(process.execPath, process.argv.slice(1), {
-    detached: true
+
+  const logfile = `gameserver-${new Date().toISOString().replace(/:|T|\.|z/gi,"")}.log`;
+  const out = fs.openSync(logfile, 'a');
+  const err = fs.openSync(logfile, 'a');
+  console.log("Next instance will log to " + logfile);
+  const args = process.argv.splice(1);
+  args.unshift("--experimental-modules"); // Apparently even if you already set it initially, it's not part of the args.
+  console.log("Next instance args : " + args);
+  spawn(process.execPath, args, {
+    detached: true,
+    stdio: ['ignore', out, err]
   }).unref();
   process.exit();
 };
