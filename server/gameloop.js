@@ -1,18 +1,12 @@
-const game_config = require("../core/game_config");
+const {Game} = require("../core/game");
 
-let update_cycle = 0;
-
-const update = () => {
-    ++update_cycle;
-    // TODO: execute the game update code here.
-};
-
+var current_game = undefined;
 const start_update_loop = ()=> {
-    console.log("Starting game update loop.");
-    setInterval(update, game_config.update_cycle_tick_ms);
+    current_game = new Game();
+    current_game.start();
 };
 
 
 // List here all things that needs to be usable by users of this module.
-module.exports.update_cycle = ()=>{ return update_cycle; };
+module.exports.update_cycle = ()=>{ return current_game.update_cycle; };
 module.exports.start = start_update_loop;

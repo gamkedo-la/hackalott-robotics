@@ -15,7 +15,6 @@ let field = {
 
     reset_server_hostname : ()=>{ server_hostname.value = default_server_hostname; },
     set_default_server : (new_default_url)=>{ default_server_hostname = new_default_url; }
-
 };
 
 field.reset_server_hostname();
