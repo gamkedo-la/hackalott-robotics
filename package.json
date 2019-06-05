@@ -1,9 +1,9 @@
 {
-  "name": "prototype-nodejs",
+  "name": "hackalott-server",
   "version": "0.1.0",
-  "description": "Prototype using nodejs for checking multiplayer case using JS in Gamkedo club context",
+  "description": "Server of Hackalott Robotics game by Gamkedo Club",
   "main": "./server/mainserv.js",
-  "author": "Klaim",
+  "author": "Gamkedo Club (Lead: A. Joël \"Klaim\" Lamotte)",
   "type": "module",
   "engines": {
     "node": "^12.2"
@@ -13,8 +13,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Klaim/prototype-nodejs.git"
+    "url": "git+https://github.com/gamkedo-la/hackalott-robotics.git"
   },
   "license": "ISC",
-  "homepage": "https://github.com/Klaim/prototype-nodejs#readme"
+  "homepage": "https://github.com/gamkedo-la/hackalott-robotics.git#readme"
 }
