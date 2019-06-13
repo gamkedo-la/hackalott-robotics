@@ -32,7 +32,10 @@ function add_client(client_socket, player_login){
         new_client.player.push_command(message);
     };
 
-    client_socket.onclose = ()=>{ remove_client(new_client); };
+    client_socket.onclose = ()=>{ 
+        console.log("Socket closed, removing client " + player_login)
+        remove_client(new_client); 
+    };
     
     // forward events from the game world to the player
     current_game.add_event_listener((events)=>{
@@ -48,8 +51,12 @@ function add_client(client_socket, player_login){
 
 function remove_client(client_to_remove){
     var client_was_removed = false;
-    clients = clients.filter(function(client, index, arr){
-        return client == client_to_remove;
+    clients = clients.filter((client, index, arr)=>{
+        if(client == client_to_remove) {
+            client_was_removed = true;
+            return true;
+        }
+        return false;
     });
     if(client_was_removed) {
         on_client_removed(client_to_remove);
