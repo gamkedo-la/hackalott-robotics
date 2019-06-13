@@ -13,7 +13,7 @@ export function ChatServer(game_server){
             client.wsocket.send([{ msgtype:"chat-history", message_history: message_history}]);
             
             let listener = (chat_log)=>{
-                client.wsocket.send({ msgtype:"chat-log", chat_log: chat_log});
+                client.wsocket.send([{ msgtype:"chat-log", chat_log: chat_log}]);
             };
             this.listener_registry.set(client, listener);
             this.chatroom.add_listener(listener);
