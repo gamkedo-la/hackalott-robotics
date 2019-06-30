@@ -28,8 +28,9 @@ function add_client(client_socket, player_login){
     // TODO: listen the socket for commands to push them in the player object
     client_socket.onmessage = (message)=> {
         // TODO: check message format and extract the command if it is a command
-        // TOOD: handle other kinds of messages too        
+        // TOOD: handle other kinds of messages too
         new_client.player.push_command(message);
+        
     };
 
     client_socket.onclose = ()=>{ 

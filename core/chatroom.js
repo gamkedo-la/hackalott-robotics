@@ -1,10 +1,26 @@
 
+export const MESSAGE_TYPE_CHATLOG = "chat-log"
+export const MESSAGE_TYPE_CHAT_HISTORY = "chat-history"
 
-export function ChatLog(login, message){
-    return {
-                login : login,
-                message : message
-            };    
+export class ChatLog {
+    constructor(login, message){
+        this.login = login;
+        this.message = message;
+    }
+};
+
+export class Message_ChatLog {
+    constructor(chat_log){
+        this.msgtype = MESSAGE_TYPE_CHATLOG;
+        this.chat_log = chat_log;
+    }
+};
+
+export class Message_ChatHistory {
+    constructor(chat_hitory){        
+        this.msgtype = MESSAGE_TYPE_CHAT_HISTORY;
+        this.message_history = chat_log;
+    }
 };
 
 const max_history_size = 100;
