@@ -33,7 +33,7 @@ B) Message Format:
     2.1. `msg_id`: A message identifier, automatically set when sent. 
     2.2. `proto` : A protocol identifier, used to dispatch the message to the right handler.
     2.3. `msg_type` : An identifier of the kind of message, defined by the protocol.
-3. Messages can contain arbitrary additional data.
+3. `data`: Optionally, messages can contain arbitrary additional data in this field.
 4. Messages are sent and received in an array of messages. This allow making sending messages
    and update loops to be independant (if wanted).
 
