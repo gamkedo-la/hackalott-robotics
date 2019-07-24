@@ -54,62 +54,74 @@ export class MessageDispatcher
 
 };
 
-// Returns true if the object have the interface of a connection
+// Returns true if the object have the interface of a socket
 // and if it's open.
-export function is_open_connection(connection){
+export function is_open_connection(socket){
     // TODO: implement this!!!
     return true;
 }
 
-// Handle a connection to work with the protocol
-// The connection can be non-remote, as long as it's
+// Handle a socket to work with the protocol
+// The socket can be non-remote, as long as it's
 // an object with the right interface it's ok.
 // It can be a websocket.
-export class Endpoint {
-    // Store and handle the connection.
-    // The connection must be open.
-    constructor(connection){
-        if(!is_open_connection(connection)){
+export class Connection {
+    // Store and handle the socket.
+    // The socket must be open.
+    constructor(socket){
+        if(!is_open_connection(socket)){
             // TODOL: log and throw an error! 
         }
         
-        this.connection = connection;
+        this.socket = socket;
         this.dispatcher = new MessageDispatcher();
         this.next_message_id = 0;
+        this.messages_to_send = [];
+        this.messages_received = [];
 
-        this.connection.addHandler("onreceive", __on_messages_received);
+        this.socket.addEventHandler("onreceive", () =>{
+
+        });
     }
 
-    // TO CONSIDER: push(message) push(message) submit()
-    send(messages){
-        for(let message in messages){
-            if(!is_valid_message(message)){
-                // TODO: log and throw an error!
-            }
-    
-            let new_message_id = this.next_message_id++;
-            message[MESSAGE_FIELD_ID] = new_message_id;
-    
+    is_open() { return this.socket && this.socket.is_connected(); }
+
+    // Register a message to be sent on next `submit()` call.
+    // Also set a new message id to the message.
+    push(message){
+        if(!is_valid_message(message)){
+            // TODO: log and throw an error!
         }
-        
-        this.connection.send([message]); // ? how to batch
+        let new_message_id = this.__new_message_id();
+        message[MESSAGE_FIELD_ID] = new_message_id;
+
+        this.messages_to_send.push(message);
     }
 
-    __on_messages_received(messages){
+    // Sends all the messages accumulated through `push()` calls.
+    submit(){
+        let messages = this.messages_to_send;
+        this.messages_to_send = [];
+        this.socket.send(messages);
+    }
+
+    // Dispatch all messages received since last call to this function.
+    receive_messages() {
+        let messages = this.messages_received;
+        this.messages_received = [];
         this.dispatcher.dispatch(messages);
     }
-    
-    __on_messages_received(messages){
 
-    }
-    
-    __on_connection_open(messages){
-
-    }
-    
-    __on_connection_closed(messages){
-
+    set_protocol_handler(handler){
+        this.dispatcher.set_handler(handler);
     }
 
-}
+    // Generate the next 
+    __new_message_id() { return this.next_message_id++; }
+};
+
+export class LocalSocket
+{
+
+};
 

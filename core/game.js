@@ -1,6 +1,6 @@
 
 import {World} from "./world.js";
-
+import protocol from "./protocol.js";
 
 const update_cycle_tick_ms = 100;
 
@@ -8,7 +8,7 @@ let next_player_id = 0;
 
 /* Represent one player connected to the game.
 */
-export function Player(name) {
+export function Player(name, socket) { // TODO: replace by class
     this.id = next_player_id++;
     this.name = name;
     this.commands = [];

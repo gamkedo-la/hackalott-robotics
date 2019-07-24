@@ -1,6 +1,6 @@
 
-export const MESSAGE_TYPE_CHATLOG = "chat-log"
-export const MESSAGE_TYPE_CHAT_HISTORY = "chat-history"
+const MESSAGE_TYPE_CHATLOG = "chat-log"
+const MESSAGE_TYPE_CHAT_HISTORY = "chat-history"
 
 export class ChatLog {
     constructor(login, message){
@@ -25,7 +25,7 @@ export class Message_ChatHistory {
 
 const max_history_size = 100;
 
-export const ChatRoom = function(){
+export const ChatRoom = function(){ // TODO: replace by a class
     
     this.message_history = []; // ChatLog objects in history order
     this.listeners = [];
