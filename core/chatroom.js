@@ -1,7 +1,8 @@
 
-const MESSAGE_TYPE_CHAT_LOG = "chat_log"
-const MESSAGE_TYPE_CHAT_ENTRY = "chat_entry"
-const MESSAGE_TYPE_CHAT_HISTORY = "chat_history"
+const MESSAGE_TYPE_CHAT_LOG = "chat_log";
+const MESSAGE_TYPE_CHAT_ENTRY = "chat_entry";
+const MESSAGE_TYPE_CHAT_HISTORY = "chat_history";
+const COMMAND_TYPE_REQUEST_HISTORY = "request_chat_history";
 
 export class ChatLog {
     constructor(login, message){
@@ -23,6 +24,13 @@ export class Message_ChatHistory {
         this.message_history = chat_log;
     }
 };
+
+export class Command_RequestChatHistory {
+    constructor(){
+        this.msgtype = COMMAND_TYPE_REQUEST_HISTORY;
+    }
+}
+
 
 const max_history_size = 100;
 

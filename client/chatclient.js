@@ -50,6 +50,8 @@ export const ChatClient = function(html_display, text_input, send_button){
         wsocket.addEventListener("message", this.on_message);
         wsocket.addEventListener("close", ()=>{ add_log(new chatroom.ChatLog("!!!!", "Connection closed.")); });
         this.send_button.onclick = ()=>{ send_message(wsocket); };
+
+        wsocket.send(new chatroom.Command_RequestChatHistory());
     };
 };
 
