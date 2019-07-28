@@ -50,7 +50,6 @@ export class MessageDispatcher
             
             if(!is_valid_message(message))
             {
-                // TODO: log error here
                 console.error(`INVALID MESSAGE ON DISPATCH: ${JSON.stringify(message)}`);
                 continue;
             }
