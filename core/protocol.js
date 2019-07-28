@@ -1,23 +1,29 @@
-
-const MESSAGE_FIELD_ID = "msg_id";
-const MESSAGE_FIELD_PROTOCOL = "proto";
-const MESSAGE_FIELD_TYPE = "msg_type";
-const MESSAGE_FIELD_DATA = "data";
+import assert from "assert";
 
 // Returns a well-formed message object with the provided data.
-export function make_message(protocol_name, message_type, data){
+export function make_message(protocol_name, message_type, data = undefined){
     // TODO: add some arguments types and values checks here
-    return {
-        MESSAGE_FIELD_ID : undefined,
-        MESSAGE_FIELD_PROTOCOL : protocol_name,
-        MESSAGE_FIELD_TYPE: message_type,
-        MESSAGE_FIELD_DATA: data
+    assert(protocol_name, "Protocol name field must be valid");
+    assert(message_type, "Message type field must be valid");
+
+    let message = {
+        msg_id : undefined,
+        proto : protocol_name,
+        msg_type : message_type,
+        data : data,
     };
+    return message;
 }
 
 export function is_valid_message(message){
-    if(!message || length(message) == 0)
+    if(!message)
         return false;
+
+    if(!message.proto
+    || !message.msg_type
+    )
+        return false;
+
     // TODO: add checks here
     return true;
 }
@@ -42,14 +48,9 @@ export class MessageDispatcher
                 continue;
             }
 
-            let handler = this.handler_map.get(message[MESSAGE_FIELD_PROTOCOL]);
+            let handler = this.handler_map.get(message.proto);
             if(handler){
-                let data = message[MESSAGE_FIELD_DATA];
-                if(data){
-                    handler[message[MESSAGE_FIELD_TYPE]](data)
-                } else {
-                    handler[message[MESSAGE_FIELD_TYPE]]();
-                }
+                handler[message.msg_type](message.data)
             }
         }
     }
@@ -95,7 +96,7 @@ export class Connection {
             // TODO: log and throw an error!
         }
         let new_message_id = this.__new_message_id();
-        message[MESSAGE_FIELD_ID] = new_message_id;
+        message.msg_id = new_message_id;
 
         this.messages_to_send.push(message);
     }

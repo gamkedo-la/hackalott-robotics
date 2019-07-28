@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert, { throws } from "assert";
 import * as proto from "../core/protocol.js";
 
 const tests = {
@@ -23,8 +23,9 @@ function run_all_tests(){
                 test_func();   
             } catch (error) {
                 if(error instanceof  assert.AssertionError){
-                    console.log(`TEST FAILURE in ${test_name} : ${error}`);
+                    console.error(`FAILURE in ${test_name} : ${error}`);
                 }
+                else throw error;
             }
         }
         else
