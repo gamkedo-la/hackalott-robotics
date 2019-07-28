@@ -1,6 +1,7 @@
 
-const MESSAGE_TYPE_CHATLOG = "chat-log"
-const MESSAGE_TYPE_CHAT_HISTORY = "chat-history"
+const MESSAGE_TYPE_CHAT_LOG = "chat_log"
+const MESSAGE_TYPE_CHAT_ENTRY = "chat_entry"
+const MESSAGE_TYPE_CHAT_HISTORY = "chat_history"
 
 export class ChatLog {
     constructor(login, message){
@@ -11,7 +12,7 @@ export class ChatLog {
 
 export class Message_ChatLog {
     constructor(chat_log){
-        this.msgtype = MESSAGE_TYPE_CHATLOG;
+        this.msgtype = MESSAGE_TYPE_CHAT_LOG;
         this.chat_log = chat_log;
     }
 };
@@ -65,5 +66,7 @@ export const ChatRoom = function(){ // TODO: replace by a class
 
 }
 
+export class Chat_ProtocolHandler{
 
+};
 
