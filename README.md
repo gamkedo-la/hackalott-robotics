@@ -81,6 +81,14 @@ Explained version:
    - Alternatively, **you can just drop `index.html` in your browser** - in this case the online server address will be the default one, so you need to replace it by `http://127.0.0.1:3000` (or another port if you specified another one). The online server info box will not be displayed though.
 
 
+Tests
+-----
+
+To run the tests: `node --experimental-modules tests/file-of-the-tests.js`
+For example: `node --experimental-modules tests/test-protocol.js`
+
+There is also a quick command `npm test` but it's slower to launch so the complete form is better for quick iteration.
+
 
 
 
