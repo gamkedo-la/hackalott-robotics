@@ -16,6 +16,8 @@ export function make_message(protocol_name, message_type, data){
 }
 
 export function is_valid_message(message){
+    if(!message || length(message) == 0)
+        return false;
     // TODO: add checks here
     return true;
 }
