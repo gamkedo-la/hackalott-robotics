@@ -64,9 +64,26 @@ export class MessageDispatcher
 };
 
 // Returns true if the object have the interface of a socket
+// that we need to be able to work with it.
+export function is_socket(socket){
+    if(!socket)
+        return false;
+    
+    if(!socket.send || !socket.send 
+    || !socket.addEventListener)
+        return false;
+
+    return true;
+}
+
+// Returns true if the object have the interface of a socket
 // and if it's open.
-export function is_open_connection(socket){
-    // TODO: implement this!!!
+export function is_open_socket(socket){
+    if(!socket)
+        return false;
+
+    // TODO: how to check if the socket is open????
+    
     return true;
 }
 
@@ -78,9 +95,7 @@ export class Connection {
     // Store and handle the socket.
     // The socket must be open.
     constructor(socket){
-        if(!is_open_connection(socket)){
-            // TODOL: log and throw an error! 
-        }
+        assert.equal(is_open_socket(socket), true);
         
         this.socket = socket;
         this.dispatcher = new MessageDispatcher();
@@ -93,14 +108,13 @@ export class Connection {
         });
     }
 
-    is_open() { return this.socket && this.socket.is_connected(); }
+    is_open() { return this.socket && this.socket.is_connected(); } // TODO: not sure if we will need this
 
     // Register a message to be sent on next `submit()` call.
     // Also set a new message id to the message.
     push(message){
-        if(!is_valid_message(message)){
-            // TODO: log and throw an error!
-        }
+        assert(is_valid_message(message), true);
+
         let new_message_id = this.__new_message_id();
         message.msg_id = new_message_id;
 
@@ -131,6 +145,17 @@ export class Connection {
 
 export class LocalSocket
 {
-
+    send(messages){
+        
+    }
+    
+    close(){
+        // TODO: ????
+    }
 };
 
+
+export class LocalRooter
+{
+
+};

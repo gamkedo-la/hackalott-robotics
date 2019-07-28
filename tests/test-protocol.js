@@ -1,5 +1,12 @@
 import assert, { throws } from "assert";
 import * as proto from "../core/protocol.js";
+import WebSocket from 'ws';
+
+function dummy_websocket() {
+    let socket = new WebSocket("wss://echo.websocket.org");
+    socket.onopen = ()=>{ socket.close(); };
+    return socket;
+}
 
 const tests = {
     messages_are_well_formed : function() {
@@ -51,7 +58,21 @@ const tests = {
         ]);
         assert.equal(count_received_success, 2);
         assert.equal(count_received_failure, 2);
-    }
+    },
+    empty_object_is_not_valid_socket : function(){
+        var socket = {};
+        assert.equal(proto.is_socket(socket), false);
+        socket = { send: function(){} };
+        assert.equal(proto.is_socket(socket), false);
+    },
+    websocket_is_valid_socket : function(){
+        let socket = dummy_websocket();
+        assert.equal(proto.is_socket(socket), true);
+    },
+    // local_socket_is_valid_socket : function(){
+    //     let socket = new proto.LocalSocket();
+    //     assert.equal(proto.is_socket(socket), true);
+    // }
 };
 
 
