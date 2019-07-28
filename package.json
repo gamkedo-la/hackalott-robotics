@@ -16,5 +16,8 @@
     "url": "git+https://github.com/gamkedo-la/hackalott-robotics.git"
   },
   "license": "ISC",
-  "homepage": "https://github.com/gamkedo-la/hackalott-robotics.git#readme"
+  "homepage": "https://github.com/gamkedo-la/hackalott-robotics.git#readme",
+  "scripts": {
+    "test": "node --experimental-modules tests/test-protocol.js"
+  }
 }
