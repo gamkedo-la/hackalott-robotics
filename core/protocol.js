@@ -31,25 +31,32 @@ export function is_valid_message(message){
 // Dispatches messages to handlers depending on their protocols and types.
 export class MessageDispatcher
 {
-    MessageDispatcher(){
+    constructor(){
         this.handler_map = new Map();
+        assert(this.handler_map);
     }
 
     set_handler(protocol_name, handler){
         // TODO: add asserts
-        this.handler_map[protocol_name] = handler;
+        assert(protocol_name);
+        assert(handler);
+        this.handler_map.set(protocol_name, handler);
     }
 
     dispatch(message_sequence){
-        for(let message in message_sequence){
+        assert(message_sequence instanceof Array);
+        // console.log(message_sequence);
+        for(let message of message_sequence){
+            
             if(!is_valid_message(message))
             {
                 // TODO: log error here
+                console.error(`INVALID MESSAGE ON DISPATCH: ${JSON.stringify(message)}`);
                 continue;
             }
 
             let handler = this.handler_map.get(message.proto);
-            if(handler){
+            if(handler && handler[message.msg_type]){
                 handler[message.msg_type](message.data)
             }
         }
