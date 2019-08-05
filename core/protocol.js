@@ -1,4 +1,5 @@
 import assert from "assert";
+import { EventEmitter } from "events";
 
 // Returns a well-formed message object with the provided data.
 export function make_message(protocol_name, message_type, data = undefined){
@@ -103,12 +104,12 @@ export class Connection {
         this.messages_to_send = [];
         this.messages_received = [];
 
-        this.socket.addEventHandler("onreceive", () =>{
 
-        });
+        this.socket.addEventHandler("onopen", this.__onopen);
+        this.socket.addEventHandler("onclose", this.__onclose);
+        this.socket.addEventHandler("onmessage", this.__onmessage);
+        this.socket.addEventHandler("onmessage", this.__onerror);
     }
-
-    is_open() { return this.socket && this.socket.is_connected(); } // TODO: not sure if we will need this
 
     // Register a message to be sent on next `submit()` call.
     // Also set a new message id to the message.
@@ -141,21 +142,51 @@ export class Connection {
 
     // Generate the next 
     __new_message_id() { return this.next_message_id++; }
+
+    __onopen(/* ??? */){
+
+    }
+
+    __onclose(/* ??? */){
+        
+    }
+
+    __onmessage(/* ??? */){
+        
+    }
+
+    __onerror(/* ??? */){
+        
+    }
 };
 
-export class LocalSocket
+export class LocalSocket extends EventEmitter
 {
+    constructor(){
+        this.messages_queue = [];
+        this.on_message_handler = [];
+        this.on_open_handler = [];
+        this.on_closed_handler = [];
+    }
+
     send(messages){
-        
+        assert.notEqual(messages, null);
+        this.messages_queue += messages;
     }
     
     close(){
         // TODO: ????
     }
+
+    update(){
+        let messages = this.messages_queue;
+        this.messages_queue = [];
+        
+    }
+
+    addEventListener(eventName, handler){
+        assert.notEqual(this[eventName], null);
+        this[eventName]
+    }
 };
 
-
-export class LocalRooter
-{
-
-};
