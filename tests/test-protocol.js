@@ -7,7 +7,7 @@ const test_port = 8989;
 const test_hostname = "localhost";
 
 function dummy_server(){
-    const http_server = http.createServer(()=>{});
+    let http_server = http.createServer(()=>{});
     http_server.listen(test_port, test_hostname);
 
     let ws_server = new WebSocket.Server({ 
@@ -142,3 +142,5 @@ function run_all_tests(){
 }
 
 run_all_tests();
+console.warn("There is an issue that makes this test never end, feel free to ctrl+C if you see all tests finished.");
+
