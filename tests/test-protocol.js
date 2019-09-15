@@ -6,14 +6,20 @@ import WebSocket from 'ws';
 const test_port = 8989;
 const test_hostname = "localhost";
 
-function dummy_server(){
-    let http_server = http.createServer(()=>{});
-    http_server.listen(test_port, test_hostname);
-
-    let ws_server = new WebSocket.Server({ 
-        server:http_server, 
-        clientTracking: true 
+async function dummy_server(){
+    
+    let http_server = await new Promise((resolve)=>{
+        let http_server = http.createServer(()=>{});
+        http_server.listen(test_port, test_hostname);
+        http_server.on("listening", ()=>{
+            resolve(http_server);
+        });
     });
+    
+    let ws_server = new WebSocket.Server({ 
+            server:http_server, 
+            clientTracking: true 
+        });
 
     ws_server.on("connection", (client)=>{
         console.log("Test server: received connection");
@@ -29,6 +35,12 @@ function dummy_server(){
         });
     });
 
+    ws_server.on("close", ()=>{ 
+        // Close the http server when we are requested to close the
+        // websocket server.
+        http_server.close();
+    });
+       
     return ws_server;
 };
 
@@ -100,14 +112,19 @@ const tests = {
         socket = { send: function(){} };
         assert.equal(proto.is_socket(socket), false);
     },
-    websocket_is_valid_socket : function(){
-        let server = dummy_server();
+    websocket_is_valid_socket : async function(){
+        let server = await dummy_server();
         let socket = dummy_websocket();
         assert.equal(proto.is_socket(socket), true);
+        // Send a message and receive it back.
+        const message_value = "kikoo";
         socket.on("open", ()=>{
-            socket.send("kikoo");
+            socket.send(message_value);
         });
-        socket.on("message", ()=>{ 
+        socket.on("message", (message)=>{
+            message = JSON.parse(message);
+            console.log("Received message: ", message);
+            assert.equal(message.data, message_value);
             server.close();
             console.log("done with socket");
         });
@@ -121,14 +138,14 @@ const tests = {
 
 
 
-function run_all_tests(){
+async function run_all_tests(){
     console.log("Running core protocol tests:");
     // console.log(Object.entries(tests));
     for(let [test_name, test_func] of Object.entries(tests)){
         console.log(`Test: ${test_name}`);
         if(test_func){
             // try {                
-                test_func();   
+                await test_func();   
             // } catch (error) {
             //     if(error instanceof  assert.AssertionError){
             //         console.error(`FAILURE in ${test_name} : ${error}`);
@@ -142,5 +159,6 @@ function run_all_tests(){
 }
 
 run_all_tests();
-console.warn("There is an issue that makes this test never end, feel free to ctrl+C if you see all tests finished.");
+
+
 
