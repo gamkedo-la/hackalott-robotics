@@ -56,13 +56,16 @@ async function check_is_valid_socket(socket){
     assert.equal(proto.is_socket(socket), true);
     // Send a message and receive it back.
     const message_value = "kikoo";
-    socket.on("open", ()=>{
-        socket.send(message_value);
-    });
-    socket.on("message", (message)=>{
-        console.log("Received message: ", message);
-        assert.equal(message, message_value);
-        console.log("done with socket");
+    return new Promise((resolve)=>{
+        socket.on("open", ()=>{
+            socket.on("message", (message)=>{
+                console.log("Received message: ", message);
+                assert.equal(message, message_value);
+                console.log("done with socket");
+                resolve();
+            });
+            socket.send(message_value);
+        });
     });
 }
 
@@ -126,13 +129,23 @@ const tests = {
     websocket_is_valid_socket : async function(){
         let server = await dummy_websocket_server();
         let socket = dummy_websocket();
+
         await check_is_valid_socket(socket);
-        socket.on("message", ()=>{ server.close(); });
+
+        server.close();
+        socket.close();
     },
-    // local_socket_is_valid_socket : function(){
-    //     let socket = new proto.LocalSocket();
-    //     await check_is_valid_socket(socket, socket);
-    // }
+    local_socket_is_valid_socket : async function(){
+        let socket = new proto.LocalSocket();
+        let socket_updater = setInterval(()=>{
+            socket.receive();
+        }, 10);
+
+        await check_is_valid_socket(socket);
+        
+        clearInterval(socket_updater);
+        socket.close();
+    }
 };
 
 

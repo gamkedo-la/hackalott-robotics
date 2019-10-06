@@ -32,11 +32,8 @@ export function is_valid_message(message){
 // Dispatches messages to handlers depending on their protocols and types.
 export class MessageDispatcher
 {
-    constructor(){
-        this.handler_map = new Map();
-        assert(this.handler_map);
-    }
-
+    handler_map = new Map();
+    
     set_handler(protocol_name, handler){
         // TODO: add asserts
         assert(protocol_name);
@@ -57,7 +54,7 @@ export class MessageDispatcher
 
             let handler = this.handler_map.get(message.proto);
             if(handler && handler[message.msg_type]){
-                handler[message.msg_type](message.data)
+                handler[message.msg_type](message.data);
             }
         }
     }
@@ -70,8 +67,10 @@ export function is_socket(socket){
     if(!socket)
         return false;
     
-    if(!socket.send || !socket.send 
-    || !socket.addEventListener)
+    if(!socket.send || !socket.send)
+        return false;
+
+    if(!(socket instanceof EventEmitter))
         return false;
 
     return true;
@@ -91,24 +90,24 @@ export function is_open_socket(socket){
 // Handle a socket to work with the protocol
 // The socket can be non-remote, as long as it's
 // an object with the right interface it's ok.
-// It can be a websocket.
+// It can be a websocket too, so we can handle all situations here.
 export class Connection {
+    socket = null;
+    dispatcher = new MessageDispatcher();
+    next_message_id = 0;
+    messages_to_send = [];
+    messages_received = [];
+
     // Store and handle the socket.
     // The socket must be open.
     constructor(socket){
         assert.equal(is_open_socket(socket), true);
         
-        this.socket = socket;
-        this.dispatcher = new MessageDispatcher();
-        this.next_message_id = 0;
-        this.messages_to_send = [];
-        this.messages_received = [];
-
-
-        this.socket.addEventHandler("onopen", this.__onopen);
-        this.socket.addEventHandler("onclose", this.__onclose);
-        this.socket.addEventHandler("onmessage", this.__onmessage);
-        this.socket.addEventHandler("onmessage", this.__onerror);
+        this.socket = socket;    
+        this.socket.on("open", this.__on_open);
+        this.socket.on("close", this.__on_close);
+        this.socket.on("message", this.__on_message);
+        this.socket.on("message", this.__on_error);
     }
 
     // Register a message to be sent on next `submit()` call.
@@ -143,50 +142,77 @@ export class Connection {
     // Generate the next 
     __new_message_id() { return this.next_message_id++; }
 
-    __onopen(/* ??? */){
+    __on_open(/* ??? */){
 
     }
 
-    __onclose(/* ??? */){
+    __on_close(/* ??? */){
         
     }
 
-    __onmessage(/* ??? */){
+    __on_message(/* ??? */){
         
     }
 
-    __onerror(/* ??? */){
+    __on_error(/* ??? */){
         
     }
 };
 
+// Socket that works locally (not remote).
+// It requires the receive() function to be called regularly to dispatch
+// messages to listeners of the "message" dispatch.
 export class LocalSocket extends EventEmitter
 {
+    is_open = true;
+    messages_queue = [];
+
     constructor(){
-        this.messages_queue = [];
-        this.on_message_handler = [];
-        this.on_open_handler = [];
-        this.on_closed_handler = [];
+        super();
+        this.emit("open");
     }
 
-    send(messages){
-        assert.notEqual(messages, null);
-        this.messages_queue += messages;
+    // Send an arbitrary message object that will be received when receive() is called.
+    send(message){
+        this.__throw_if_closed();
+        assert.notEqual(message, null);
+        this.messages_queue.push(message);
     }
     
+    // Close this socket: make it unusable.
     close(){
         // TODO: ????
+        this.is_open = false;
     }
 
-    update(){
+    // Dispatch each messages to the "message" handlers.
+    receive(){
+        // console.log("receive!");
+        this.__throw_if_closed();
         let messages = this.messages_queue;
         this.messages_queue = [];
-        
+        messages.forEach(message => {
+            // console.log(`message received: ${message}`);
+            this.emit("message", message);
+        });
     }
 
-    addEventListener(eventName, handler){
-        assert.notEqual(this[eventName], null);
-        this[eventName]
+    // Adds a handler for the associated event name.
+    on(eventName, listener)
+    {
+        if(eventName == "open" && this.is_open)
+            listener();
+        else if(eventName == "close" && !this.is_open)
+            listener();
+        else
+            super.on(eventName, listener);
+    }
+
+    // Used to throw errors if this socket is closed and we try to use it.
+    __throw_if_closed(){  
+        if(this.is_open === false){
+            throw "failure: attempt to use a closed LocalSocket"
+        }
     }
 };
 
