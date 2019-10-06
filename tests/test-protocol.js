@@ -23,11 +23,8 @@ async function dummy_server(){
 
     ws_server.on("connection", (client)=>{
         console.log("Test server: received connection");
-        client.on("message", (data)=>{ // just ping back
-            client.send(JSON.stringify({
-                msg: "response",
-                data: data 
-            }), (err)=>{ 
+        client.on("message", (data)=>{ // just send back
+            client.send(data, (err)=>{ 
                 console.log("Test server: now closing");
                 client.close();
                 console.log("Test server: closing done"); 
@@ -122,13 +119,11 @@ const tests = {
             socket.send(message_value);
         });
         socket.on("message", (message)=>{
-            message = JSON.parse(message);
             console.log("Received message: ", message);
-            assert.equal(message.data, message_value);
+            assert.equal(message, message_value);
             server.close();
             console.log("done with socket");
         });
-        console.log("kikoo");
     },
     // local_socket_is_valid_socket : function(){
     //     let socket = new proto.LocalSocket();
