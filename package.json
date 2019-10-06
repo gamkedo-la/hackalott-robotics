@@ -6,10 +6,10 @@
   "author": "Gamkedo Club (Lead: A. Joël \"Klaim\" Lamotte)",
   "type": "module",
   "engines": {
-    "node": "^12.2"
+    "node": "^12.11"
   },
   "dependencies": {
-    "ws": "^7.0.0"
+    "ws": "^7.1"
   },
   "repository": {
     "type": "git",

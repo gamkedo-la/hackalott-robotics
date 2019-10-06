@@ -52,7 +52,7 @@ node --experimental-modules ./server/mainserv.js 3000
 
 Explained version:
 
-1. Install `NodeJS` **v12.2** or compatible (this will also install `npm`).
+1. Install `NodeJS` **v12.11** or compatible (this will also install `npm`).
 
     On Ubuntu LTS, because the NodeJS package version might be older, you might need to use NodeJS's PPA as explained there: https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/
 
