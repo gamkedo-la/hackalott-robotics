@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "./utility/assert.js";
 import { EventEmitter } from "events";
 
 // Returns a well-formed message object with the provided data.
@@ -101,7 +101,7 @@ export class Connection {
     // Store and handle the socket.
     // The socket must be open.
     constructor(socket){
-        assert.equal(is_open_socket(socket), true);
+        assert(is_open_socket(socket));
         
         this.socket = socket;    
         this.socket.on("open", this.__on_open);
@@ -113,7 +113,7 @@ export class Connection {
     // Register a message to be sent on next `submit()` call.
     // Also set a new message id to the message.
     push(message){
-        assert(is_valid_message(message), true);
+        assert(is_valid_message(message));
 
         let new_message_id = this.__new_message_id();
         message.msg_id = new_message_id;
@@ -175,7 +175,7 @@ export class LocalSocket extends EventEmitter
     // Send an arbitrary message object that will be received when receive() is called.
     send(message){
         this.__throw_if_closed();
-        assert.notEqual(message, null);
+        assert(message);
         this.messages_queue.push(message);
     }
     
