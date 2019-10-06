@@ -6,7 +6,7 @@ import WebSocket from 'ws';
 const test_port = 8989;
 const test_hostname = "localhost";
 
-async function dummy_server(){
+async function dummy_websocket_server(){
     
     let http_server = await new Promise((resolve)=>{
         let http_server = http.createServer(()=>{});
@@ -50,6 +50,20 @@ function dummy_websocket() {
         console.error(`Failed to create test websocket: ${err}`);
         return null;
     }
+}
+
+async function check_is_valid_socket(socket){
+    assert.equal(proto.is_socket(socket), true);
+    // Send a message and receive it back.
+    const message_value = "kikoo";
+    socket.on("open", ()=>{
+        socket.send(message_value);
+    });
+    socket.on("message", (message)=>{
+        console.log("Received message: ", message);
+        assert.equal(message, message_value);
+        console.log("done with socket");
+    });
 }
 
 const tests = {
@@ -110,24 +124,14 @@ const tests = {
         assert.equal(proto.is_socket(socket), false);
     },
     websocket_is_valid_socket : async function(){
-        let server = await dummy_server();
+        let server = await dummy_websocket_server();
         let socket = dummy_websocket();
-        assert.equal(proto.is_socket(socket), true);
-        // Send a message and receive it back.
-        const message_value = "kikoo";
-        socket.on("open", ()=>{
-            socket.send(message_value);
-        });
-        socket.on("message", (message)=>{
-            console.log("Received message: ", message);
-            assert.equal(message, message_value);
-            server.close();
-            console.log("done with socket");
-        });
+        await check_is_valid_socket(socket);
+        socket.on("message", ()=>{ server.close(); });
     },
     // local_socket_is_valid_socket : function(){
     //     let socket = new proto.LocalSocket();
-    //     assert.equal(proto.is_socket(socket), true);
+    //     await check_is_valid_socket(socket, socket);
     // }
 };
 
