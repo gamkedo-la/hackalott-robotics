@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+    </head>
+<body style="background-color:whitesmoke">
+    <h1>This file should only be run locally.</h1>
+    <h1>Waiting for all code to run...<br/>(if stalled, check the web console)</h1>
+</body>
+<script type="module">
+    function display_text(text) {
+        let node = document.createElement("h1");
+        node.appendChild(document.createTextNode(text));
+        document.body.appendChild(node);
+    }
+
+    // Keep this line at the beginning of test sequence
+    display_text("Running tests...");
+
+    // TODO: Add here imports to all js modules that contain code for both 
+    // normal JS client and NodeJS server.
+    // Everything in /core/ should be lister here ultimately.
+    import proto from "./core/protocol.js";
+    
+    // Keep this line at the end
+    display_text("All tests seems fine.");
+</script>
+</html>
